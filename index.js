@@ -1,17 +1,17 @@
 const express = require("express");
 const app = express()
 const database = require("./config/sequelize")
-const userRouter = require("./routes/users.js")
-const topupRouter = require("./routes/topup.js")
-const rechargeRoute = require("./routes/recharge.js")
-const placeRoute = require("./routes/places.js")
+// const userRouter = require("./routes/users.js")
+// const topupRouter = require("./routes/topup.js")
+// const rechargeRoute = require("./routes/recharge.js")
+// const placeRoute = require("./routes/places.js")
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-app.use("/api/users", userRouter)
-app.use("/api/topup", topupRouter)
-app.use("/api/recharge", rechargeRoute)
-app.use("/api/places", placeRoute)
+// app.use("/api/users", userRouter)
+// app.use("/api/topup", topupRouter)
+// app.use("/api/recharge", rechargeRoute)
+// app.use("/api/places", placeRoute)
 
 const port = 3000;
 const init = async () => { 
