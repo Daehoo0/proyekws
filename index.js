@@ -9,7 +9,7 @@ const { google } = require('googleapis');
 const youtube = google.youtube('v3');
 
 // Your API key tes pakai punya masing masing
-const apiKey = 'AIzaSyAhqt5KmRDYwzvSHrNfPYYKGvXCyCIm-RY';
+const apiKey = '';
 
 // Function to search for videos
 async function searchVideos(query) {
