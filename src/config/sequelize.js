@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 
 const db = new Sequelize(
-    "t7_6845", //database name
+    "db_travel", //database name
     "root", //database username
     "", //database password
     {
