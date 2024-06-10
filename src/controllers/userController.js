@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // Register a new user
 const registerUser = async (req, res) => {
@@ -88,8 +89,33 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const testAxios = async (req,res) =>{
+    const axios = require('axios');
+
+const options = {
+  method: 'GET',
+  url: 'https://sky-scanner3.p.rapidapi.com/cars/search',
+  params: {
+    pickUpEntityId: '95565058'
+  },
+  headers: {
+    'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+    'x-rapidapi-host': process.env.RAPIDAPI_HOST
+  }
+};
+
+try {
+	const response = await axios.request(options);
+	console.log(response.data);
+} catch (error) {
+	console.error(error);
+}
+}
+
 
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    deleteUser,
+    testAxios
 };
