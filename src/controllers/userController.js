@@ -61,6 +61,34 @@ const loginUser = async (req, res) => {
     }
 };
 
+const deleteUser = async (req, res) => {
+    let token = req.header('x-auth-token')
+         if(!token){
+            return res.status(403).send('No Authentication Found')
+        }
+
+    try {    
+        let userdata = jwt.verify(token, 'your_jwt_secret')
+
+        const { ID } = req.body;
+
+        const user = await User.findOne({ where: { ID } });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        await User.destroy({
+            where:{
+                user_id: ID
+            }
+        })
+
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+
 module.exports = {
     registerUser,
     loginUser
