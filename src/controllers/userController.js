@@ -90,8 +90,6 @@ const deleteUser = async (req, res) => {
     }
 };
 
-const getAirport = async (req,res) =>{
-
 const getAirport = async (req, res) => {
     let token = req.header("x-auth-token");
     if (!token) {
@@ -126,9 +124,6 @@ const getAirport = async (req, res) => {
     }
 };
 
-module.exports = getAirport;
-
-}
 
 
 module.exports = {
