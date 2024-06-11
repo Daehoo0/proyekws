@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const database = require("./config/sequelize");
-const { registerUser, loginUser, deleteUser, testAxios } = require("./controllers/userController");
+const { registerUser, loginUser, deleteUser, testAxios, getAirport } = require("./controllers/userController");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -9,7 +9,7 @@ app.use(express.urlencoded({ extended: true }));
 app.post("/api/register", registerUser);
 app.get("/api/login", loginUser);
 app.get("/api/delete", deleteUser)
-app.get("/api/test", testAxios)
+app.get("/api/test", getAirport)
 
 const port = 3000;
 const init = async () => {

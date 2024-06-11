@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 require('dotenv').config();
 
 // Register a new user
@@ -89,27 +90,44 @@ const deleteUser = async (req, res) => {
     }
 };
 
-const testAxios = async (req,res) =>{
-    const axios = require('axios');
+const getAirport = async (req,res) =>{
 
-const options = {
-  method: 'GET',
-  url: 'https://sky-scanner3.p.rapidapi.com/cars/search',
-  params: {
-    pickUpEntityId: '95565058'
-  },
-  headers: {
-    'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-    'x-rapidapi-host': process.env.RAPIDAPI_HOST
-  }
+const getAirport = async (req, res) => {
+    let token = req.header("x-auth-token");
+    if (!token) {
+        return res.status(403).send({ message: "Unauthorized" });
+    }
+
+    try {
+        let userdata = jwt.verify(token, process.env.JWT_SECRET);
+        if (!userdata.id) {
+            return res.status(403).send({ message: "Not registered" });
+        }
+
+        const options = {
+            method: 'GET',
+            url: 'https://sky-scanner3.p.rapidapi.com/flights/airports',
+            headers: {
+                'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+                'x-rapidapi-host': 'sky-scanner3.p.rapidapi.com'
+            }
+        };
+
+        try {
+            const response = await axios.request(options);
+            return res.status(200).send(response.data); 
+        } catch (error) {
+            console.error(error);
+            return res.status(500).send({ message: "Error fetching airport data" });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(403).send({ message: "Invalid token" });
+    }
 };
 
-try {
-	const response = await axios.request(options);
-	console.log(response.data);
-} catch (error) {
-	console.error(error);
-}
+module.exports = getAirport;
+
 }
 
 
@@ -117,5 +135,5 @@ module.exports = {
     registerUser,
     loginUser,
     deleteUser,
-    testAxios
+    getAirport
 };
