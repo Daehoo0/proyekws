@@ -452,6 +452,41 @@ function generateReviewId() {
   return 'REVID123'; // Example review_id
 }
 
+const getReviewsByUser = async (req, res) => {
+  // Define the Joi schema for validation
+  const schema = Joi.object({
+      user_id: Joi.string().required().messages({
+          "any.required": "User ID is required",
+          "string.empty": "User ID is required",
+      }),
+  });
+
+  // Validate the request body
+  try {
+      await schema.validateAsync(req.body);
+  } catch (error) {
+      return res.status(400).json({
+          status: 400,
+          body: {
+              message: error.message,
+          },
+      });
+  }
+
+  const { user_id } = req.body;
+
+  try {
+      const reviews = await Review.findAll({ where: { user_id } });
+      res.status(200).json({
+          status: 200,
+          body: reviews,
+      });
+  } catch (error) {
+      console.error('Error fetching reviews: ', error);
+      return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -463,4 +498,5 @@ module.exports = {
   findPlace,
   getEvents,
   addReview,
+  getReviewsByUser,
 };
