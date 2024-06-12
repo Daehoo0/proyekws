@@ -281,10 +281,30 @@ const recharge = async (req, res) => {
     }
 };
 
+const test = async (req,res) =>{
+
+    const options = {
+    method: 'GET',
+    url: 'https://tripadvisor16.p.rapidapi.com/api/v1/test',
+    headers: {
+        'x-rapidapi-key': '2865e812acmshff540095f57d8f1p1e65b1jsn051cd0912cae',
+        'x-rapidapi-host': 'tripadvisor16.p.rapidapi.com'
+    }
+    };
+
+    try {
+        const response = await axios.request(options);
+        console.log(response.data);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 module.exports = {
     registerUser,
     loginUser,
     deleteUser,
     getAirport,
-    recharge
+    recharge,
+    test
 };
