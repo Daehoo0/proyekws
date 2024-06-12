@@ -1,38 +1,42 @@
-const { DataTypes } = require('sequelize');
-const db = require('../config/sequelize');
-const User = require('./User');
+const { DataTypes } = require("sequelize");
+const db = require("../config/sequelize");
+const User = require("./User");
 
-const Review = db.define('Review', {
+const Review = db.define(
+  "Review",
+  {
     review_id: {
-        type: DataTypes.STRING,
-        primaryKey: true
+      type: DataTypes.STRING,
+      primaryKey: true,
     },
     user_id: {
-        type: DataTypes.STRING,
-        references: {
-            model: User,
-            key: 'user_id'
-        }
+      type: DataTypes.STRING,
+      references: {
+        model: User,
+        key: "user_id",
+      },
     },
     rating: {
-        type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
     },
     review: {
-        type: DataTypes.TEXT
+      type: DataTypes.TEXT,
     },
     created_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     update_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
-    }
-}, {
-    tableName: 'reviews',
-    timestamps: false
-});
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+  },
+  {
+    tableName: "reviews",
+    timestamps: false,
+  }
+);
 
 module.exports = Review;

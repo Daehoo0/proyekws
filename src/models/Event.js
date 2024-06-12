@@ -1,50 +1,54 @@
-const { DataTypes } = require('sequelize');
-const db = require('../config/sequelize');
-const User = require('./User');
+const { DataTypes } = require("sequelize");
+const db = require("../config/sequelize");
+const User = require("./User");
 
-const Event = db.define('Event', {
+const Event = db.define(
+  "Event",
+  {
     event_id: {
-        type: DataTypes.STRING,
-        primaryKey: true
+      type: DataTypes.STRING,
+      primaryKey: true,
     },
     organizer_id: {
-        type: DataTypes.STRING,
-        references: {
-            model: User,
-            key: 'user_id'
-        }
+      type: DataTypes.STRING,
+      references: {
+        model: User,
+        key: "user_id",
+      },
     },
     event_name: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     category: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     location: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     event_time: {
-        type: DataTypes.DATE
+      type: DataTypes.DATE,
     },
     description: {
-        type: DataTypes.TEXT
+      type: DataTypes.TEXT,
     },
     photo: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     created_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     update_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
-    }
-}, {
-    tableName: 'events',
-    timestamps: false
-});
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+  },
+  {
+    tableName: "events",
+    timestamps: false,
+  }
+);
 
 module.exports = Event;

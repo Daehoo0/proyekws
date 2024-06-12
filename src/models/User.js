@@ -1,44 +1,48 @@
-const { DataTypes } = require('sequelize');
-const db = require('../config/sequelize');
+const { DataTypes } = require("sequelize");
+const db = require("../config/sequelize");
 
-const User = db.define('User', {
+const User = db.define(
+  "User",
+  {
     user_id: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-        allowNull: false,
+      type: DataTypes.STRING,
+      primaryKey: true,
+      allowNull: false,
     },
     username: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     name: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     password: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     email: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     role: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     balance: {
-        type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
     },
     api_hit: {
-        type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
     },
     createdAt: {
-        type: DataTypes.DATE
+      type: DataTypes.DATE,
     },
     updatedAt: {
-        type: DataTypes.DATE,
-        field: 'update_at'
-    }
-}, {
-    tableName: 'users',
+      type: DataTypes.DATE,
+      field: "update_at",
+    },
+  },
+  {
+    tableName: "users",
     timestamps: false,
-    underscored: true
-});
+    underscored: true,
+  }
+);
 
 module.exports = User;
