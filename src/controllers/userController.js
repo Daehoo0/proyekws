@@ -244,7 +244,7 @@ const getAirport = async (req, res) => {
       url: "https://sky-scanner3.p.rapidapi.com/flights/airports",
       headers: {
         "x-rapidapi-key": process.env.RAPIDAPI_KEY,
-        "x-rapidapi-host": "sky-scanner3.p.rapidapi.com",
+        "x-rapidapi-host": process.env.RAPIDAPI_HOST,
       },
     };
 
