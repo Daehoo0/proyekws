@@ -11,6 +11,7 @@ const {
   test,
   findPlace,
   getEvents,
+  addReview,
 } = require("./controllers/userController");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,6 +24,7 @@ app.post("/api/recharge", [verifyToken], recharge);
 app.get("/test", test);
 app.get("/api/findPlace", findPlace);
 app.get("/api/events", [verifyToken], getEvents);
+app.post('/api/reviews', [verifyToken], addReview); 
 
 const port = 3000;
 const init = async () => {

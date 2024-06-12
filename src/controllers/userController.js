@@ -403,6 +403,55 @@ const getEvents = async (req, res) => {
   }
 };
 
+const addReview = async (req, res) => {
+  try {
+      const schema = Joi.object({
+          rating: Joi.number().integer().min(1).max(5).required(),
+          review: Joi.string().required(),
+      });
+
+      const validation = await schema.validateAsync(req.body);
+      if (validation.error) {
+          const errors = validation.error.details.map(err => err.message);
+          return res.status(400).json({ errors });
+      }
+
+      const { rating, review } = req.body;
+      const { user_id } = req.body.userdata;
+
+      const review_id = generateReviewId(); // Assuming you have a function to generate review_id
+
+      const currentDate = moment().format('YYYY-MM-DD HH:mm:ss');
+
+      const newReview = await Review.create({
+          review_id,
+          user_id,
+          rating,
+          review,
+          created_at: currentDate,
+          update_at: currentDate,
+      });
+
+      res.status(201).json({
+          status: 201,
+          body: {
+              message: 'Review added successfully',
+              review: newReview,
+          },
+      });
+  } catch (error) {
+      console.error('Error adding review: ', error);
+      return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Helper function to generate review_id
+function generateReviewId() {
+  // Implement your own logic to generate review_id
+  // For example, using a random string or a combination of timestamp and user_id
+  return 'REVID123'; // Example review_id
+}
+
 module.exports = {
   registerUser,
   loginUser,
@@ -413,4 +462,5 @@ module.exports = {
   test,
   findPlace,
   getEvents,
+  addReview,
 };
