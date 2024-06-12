@@ -209,38 +209,38 @@ const getAirport = async (req, res) => {
         return res.status(403).send({ message: "Unauthorized" });
     }
 
-    try {
-        let userdata = jwt.verify(token, process.env.JWT_SECRET);
-        if (!userdata.id) {
-            return res.status(403).send({ message: "Not registered" });
-        }
+    // try {
+    //     let userdata = jwt.verify(token, process.env.JWT_SECRET);
+    //     if (!userdata.id) {
+    //         return res.status(403).send({ message: "Not registered" });
+    //     }
 
-        const options = {
-            method: 'GET',
-            url: 'https://sky-scanner3.p.rapidapi.com/flights/airports',
-            headers: {
-                'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-                'x-rapidapi-host': 'sky-scanner3.p.rapidapi.com'
-            }
-        };
+    //     const options = {
+    //         method: 'GET',
+    //         url: 'https://sky-scanner3.p.rapidapi.com/flights/airports',
+    //         headers: {
+    //             'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+    //             'x-rapidapi-host': 'sky-scanner3.p.rapidapi.com'
+    //         }
+    //     };
 
-        const response = await axios.request(options);
-        return res.status(200).send(response.data); 
-    } catch (error) {
-        console.error(error);
+    //     const response = await axios.request(options);
+    //     return res.status(200).send(response.data); 
+    // } catch (error) {
+    //     console.error(error);
 
-        if (error.response) {
-            // The request was made, and the server responded with a status code
-            // that falls out of the range of 2xx
-            return res.status(error.response.status).send({ message: error.response.data });
-        } else if (error.request) {
-            // The request was made, but no response was received
-            return res.status(500).send({ message: "No response received from the API" });
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            return res.status(500).send({ message: "Error fetching airport data" });
-        }
-    }
+    //     if (error.response) {
+    //         // The request was made, and the server responded with a status code
+    //         // that falls out of the range of 2xx
+    //         return res.status(error.response.status).send({ message: error.response.data });
+    //     } else if (error.request) {
+    //         // The request was made, but no response was received
+    //         return res.status(500).send({ message: "No response received from the API" });
+    //     } else {
+    //         // Something happened in setting up the request that triggered an Error
+    //         return res.status(500).send({ message: "Error fetching airport data" });
+    //     }
+    // }
 };
 
 const recharge = async (req, res) => {
@@ -295,10 +295,45 @@ const test = async (req,res) =>{
     try {
         const response = await axios.request(options);
         console.log(response.data);
+        return res.status(200).send(response.data)
     } catch (error) {
         console.error(error);
     }
 }
+
+const findPlace = async (req, res) => {
+    try {
+        const clientId = process.env.CLIENT_ID;
+        console.log(clientId)        
+        const clientSecret = process.env.CLIENT_SECRET;
+        console.log(clientSecret)
+
+        // Check if clientId and clientSecret are defined
+        if (!clientId || !clientSecret) {
+            throw new Error('Client ID or Client Secret is not defined');
+        }
+
+        const endpoint = 'https://api.foursquare.com/v2/venues/search';
+
+        const params = {
+            client_id: clientId,
+            client_secret: clientSecret,
+            near: 'Jakarta, Indonesia', // Example: searching near Jakarta
+            radius: 5000, // 5km radius
+            query: 'restaurant' // Example: searching for restaurants
+        };
+
+        const response = await axios.get(endpoint, { params });
+
+        // Send the response data back to the client
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error:', error);
+        // Send an error response back to the client if something goes wrong
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 
 module.exports = {
     registerUser,
@@ -306,5 +341,6 @@ module.exports = {
     deleteUser,
     getAirport,
     recharge,
-    test
+    test,
+    findPlace
 };
