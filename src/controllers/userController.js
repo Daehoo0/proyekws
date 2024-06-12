@@ -198,15 +198,22 @@ const loginUser = async (req, res) => {
   }
 };
 
-const deleteUser = async (req, res) => {
+const verifyToken = async (req, res, next) => {
   let token = req.header("x-auth-token");
   if (!token) {
-    return res.status(403).send({ message: "No Authentication Found" });
+    return res.status(401).send({ message: "Unauthorized" });
   }
 
   try {
-    let userdata = jwt.verify(token, process.env.JWT_SECRET);
+    req.body.userdata = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    return res.status(401).send({ message: "Invalid token" });
+  }
+  next();
+};
 
+const deleteUser = async (req, res) => {
+  try {
     const { user_id } = req.body; // Assuming the ID is sent as 'user_id'
 
     const user = await User.findOne({ where: { user_id } });
@@ -226,17 +233,11 @@ const deleteUser = async (req, res) => {
 };
 
 const getAirport = async (req, res) => {
-  let token = req.header("x-auth-token");
-  if (!token) {
-    return res.status(403).send({ message: "Unauthorized" });
-  }
-
   // try {
-  //     let userdata = jwt.verify(token, process.env.JWT_SECRET);
+  //     let { userdata } = req.body
   //     if (!userdata.id) {
   //         return res.status(403).send({ message: "Not registered" });
   //     }
-
   //     const options = {
   //         method: 'GET',
   //         url: 'https://sky-scanner3.p.rapidapi.com/flights/airports',
@@ -245,12 +246,10 @@ const getAirport = async (req, res) => {
   //             'x-rapidapi-host': 'sky-scanner3.p.rapidapi.com'
   //         }
   //     };
-
   //     const response = await axios.request(options);
   //     return res.status(200).send(response.data);
   // } catch (error) {
   //     console.error(error);
-
   //     if (error.response) {
   //         // The request was made, and the server responded with a status code
   //         // that falls out of the range of 2xx
@@ -266,13 +265,8 @@ const getAirport = async (req, res) => {
 };
 
 const recharge = async (req, res) => {
-  let token = req.header("x-auth-token");
-  if (!token) {
-    return res.status(403).send({ message: "Unauthorized" });
-  }
-
   try {
-    let userdata = jwt.verify(token, process.env.JWT_SECRET);
+    let { userdata } = req.body;
     if (!userdata.id) {
       return res.status(403).send({ message: "Not registered" });
     }
@@ -359,13 +353,8 @@ const findPlace = async (req, res) => {
 };
 
 const getEvents = async (req, res) => {
-  const token = req.header("x-auth-token");
-  if (!token) {
-    return res.status(403).send({ message: "Unauthorized" });
-  }
-
   try {
-    const userdata = jwt.verify(token, process.env.JWT_SECRET);
+    const { userdata } = req.body;
     if (!userdata.id) {
       return res.status(403).send({ message: "Not registered" });
     }
@@ -410,6 +399,7 @@ const getEvents = async (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
+  verifyToken,
   deleteUser,
   getAirport,
   recharge,

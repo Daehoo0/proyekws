@@ -4,6 +4,7 @@ const database = require("./config/sequelize");
 const {
   registerUser,
   loginUser,
+  verifyToken,
   deleteUser,
   getAirport,
   recharge,
@@ -16,12 +17,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post("/api/register", registerUser);
 app.post("/api/login", loginUser);
-app.get("/api/delete", deleteUser);
-app.get("/api/getAirport", getAirport);
-app.post("/api/recharge", recharge);
+app.get("/api/delete", [verifyToken], deleteUser);
+app.get("/api/getAirport", [verifyToken], getAirport);
+app.post("/api/recharge", [verifyToken], recharge);
 app.get("/test", test);
 app.get("/api/findPlace", findPlace);
-app.get("/api/events", getEvents);
+app.get("/api/events", [verifyToken], getEvents);
 
 const port = 3000;
 const init = async () => {
