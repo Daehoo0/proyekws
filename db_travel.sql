@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS guides;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
-    user_id VARCHAR(255) DEFAULT NULL,
+    user_id VARCHAR(255),
     username VARCHAR(255) DEFAULT NULL,
     name VARCHAR(255) DEFAULT NULL,
     password VARCHAR(255) DEFAULT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE traveler_profiles (
-    traveler_id VARCHAR(255) DEFAULT NULL,
+    traveler_id VARCHAR(255),
     user_id VARCHAR(255) DEFAULT NULL,
     destination VARCHAR(255) DEFAULT NULL,
     travel_time DATETIME DEFAULT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE traveler_profiles (
 );
 
 CREATE TABLE guides (
-    guide_id VARCHAR(255) DEFAULT NULL,
+    guide_id VARCHAR(255),
     user_id VARCHAR(255) DEFAULT NULL,
     location VARCHAR(255) DEFAULT NULL,
     experience TEXT DEFAULT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE guides (
 );
 
 CREATE TABLE events (
-    event_id VARCHAR(255) DEFAULT NULL,
+    event_id VARCHAR(255),
     organizer_id VARCHAR(255) DEFAULT NULL,
     event_name VARCHAR(255) DEFAULT NULL,
     category VARCHAR(255) DEFAULT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE events (
 );
 
 CREATE TABLE event_participants (
-    event_participant_id VARCHAR(255) DEFAULT NULL,
+    event_participant_id VARCHAR(255),
     event_id VARCHAR(255) DEFAULT NULL,
     user_id VARCHAR(255) DEFAULT NULL,
     created_at DATETIME NOT NULL,
@@ -76,7 +76,7 @@ CREATE TABLE event_participants (
 );
 
 CREATE TABLE guide_requests (
-    request_id VARCHAR(255) DEFAULT NULL,
+    request_id VARCHAR(255),
     traveler_id VARCHAR(255) DEFAULT NULL,
     guide_id VARCHAR(255) DEFAULT NULL,
     request_date DATETIME DEFAULT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE guide_requests (
 );
 
 CREATE TABLE reviews (
-    review_id VARCHAR(255) DEFAULT NULL,
+    review_id VARCHAR(255),
     user_id VARCHAR(255) DEFAULT NULL,
     rating INT(11) DEFAULT NULL,
     review TEXT DEFAULT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE reviews (
 );
 
 CREATE TABLE rsvps (
-    rsvp_id VARCHAR(255) DEFAULT NULL,
+    rsvp_id VARCHAR(255),
     user_id VARCHAR(255) DEFAULT NULL,
     event_id VARCHAR(255) DEFAULT NULL,
     created_at DATETIME NOT NULL,
