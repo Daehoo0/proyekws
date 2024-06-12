@@ -112,9 +112,9 @@ CREATE TABLE rsvps (
 );
 
 INSERT INTO users (user_id, username, name, password, email, role, balance, api_hit, created_at, update_at) VALUES 
-('1', 'user1', 'John Doe', 'password1', 'john@example.com', 'traveler', 100, 0, NOW(), NOW()),
-('2', 'user2', 'Jane Smith', 'password2', 'jane@example.com', 'organizer', 200, 0, NOW(), NOW()),
-('3', 'user3', 'Mike Johnson', 'password3', 'mike@example.com', 'guide', 150, 0, NOW(), NOW());
+('1', 'user1', 'John Doe', '$2b$10$FybqX0sqpTrdcHnyySnW0O3AmGAzOZuhCvefIIygGBk9XWVYW1BN.' /* "password1" */, 'john@example.com', 'traveler', 100, 0, NOW(), NOW()),
+('2', 'user2', 'Jane Smith', '$2b$10$0GzILK2xH20gL9A0qokAROMueJIwt2IBw7FR5QSGWvT8O6zZQg5Qa' /* "password2" */, 'jane@example.com', 'organizer', 200, 0, NOW(), NOW()),
+('3', 'user3', 'Mike Johnson', '$2b$10$UFS52VI8sbYC5iyA3SuPGuXA3AqNFVDeJJSjyrj4/EQ6MLybaobVe' /* "password3" */, 'mike@example.com', 'guide', 150, 0, NOW(), NOW());
 
 INSERT INTO traveler_profiles (traveler_id, user_id, destination, travel_time, interests, created_at, update_at) VALUES 
 ('1', '1', 'Bali', '2024-07-01 00:00:00', 'Beaches, Culture', NOW(), NOW()),
