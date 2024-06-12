@@ -4,49 +4,41 @@ const db = require('../config/sequelize');
 const User = db.define('User', {
     user_id: {
         type: DataTypes.STRING,
-        primaryKey: true
+        primaryKey: true,
+        allowNull: false,
     },
     username: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: DataTypes.STRING
     },
     name: {
         type: DataTypes.STRING
     },
     password: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: DataTypes.STRING
     },
     email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        type: DataTypes.STRING
     },
     role: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: DataTypes.STRING
     },
     balance: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0
+        type: DataTypes.INTEGER
     },
     api_hit: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0
+        type: DataTypes.INTEGER
     },
-    created_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
+    createdAt: {
+        type: DataTypes.DATE
     },
-    update_at: {
+    updatedAt: {
         type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
+        field: 'update_at'
     }
 }, {
     tableName: 'users',
-    timestamps: false
+    timestamps: false,
+    underscored: true
 });
 
 module.exports = User;

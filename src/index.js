@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.post("/api/register", registerUser);
-app.get("/api/login", loginUser);
+app.post("/api/login", loginUser);
 app.get("/api/delete", deleteUser)
 app.get("/api/getAirport", getAirport)
 app.post("/api/recharge", recharge)
