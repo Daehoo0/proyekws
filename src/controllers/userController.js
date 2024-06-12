@@ -334,6 +334,54 @@ const findPlace = async (req, res) => {
     }
 };
 
+const getEvents = async (req, res) => {
+    const token = req.header("x-auth-token");
+    if (!token) {
+        return res.status(403).send({ message: "Unauthorized" });
+    }
+
+    try {
+        const userdata = jwt.verify(token, process.env.JWT_SECRET);
+        if (!userdata.id) {
+            return res.status(403).send({ message: "Not registered" });
+        }
+
+        const schema = Joi.object({
+            location: Joi.string().optional(),
+            category: Joi.string().optional(),
+            event_time: Joi.date().optional(),
+        });
+
+        const validation = await schema.validateAsync(req.query);
+        if (validation.error) {
+            const errors = validation.error.details.map((err) => err.message);
+            return res.status(400).json({ errors });
+        }
+
+        const { location, category, event_time } = req.query;
+        const whereClause = {};
+
+        if (location) {
+            whereClause.location = location;
+        }
+        if (category) {
+            whereClause.category = category;
+        }
+        if (event_time) {
+            whereClause.event_time = event_time;
+        }
+
+        const events = await Event.findAll({ where: whereClause });
+
+        res.status(200).json({
+            status: 200,
+            body: events,
+        });
+    } catch (error) {
+        console.error("Error fetching events: ", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
 
 module.exports = {
     registerUser,
@@ -342,5 +390,6 @@ module.exports = {
     getAirport,
     recharge,
     test,
-    findPlace
+    findPlace,
+    getEvents
 };
