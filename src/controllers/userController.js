@@ -233,35 +233,42 @@ const deleteUser = async (req, res) => {
 };
 
 const getAirport = async (req, res) => {
-  // try {
-  //     let { userdata } = req.body
-  //     if (!userdata.id) {
-  //         return res.status(403).send({ message: "Not registered" });
-  //     }
-  //     const options = {
-  //         method: 'GET',
-  //         url: 'https://sky-scanner3.p.rapidapi.com/flights/airports',
-  //         headers: {
-  //             'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-  //             'x-rapidapi-host': 'sky-scanner3.p.rapidapi.com'
-  //         }
-  //     };
-  //     const response = await axios.request(options);
-  //     return res.status(200).send(response.data);
-  // } catch (error) {
-  //     console.error(error);
-  //     if (error.response) {
-  //         // The request was made, and the server responded with a status code
-  //         // that falls out of the range of 2xx
-  //         return res.status(error.response.status).send({ message: error.response.data });
-  //     } else if (error.request) {
-  //         // The request was made, but no response was received
-  //         return res.status(500).send({ message: "No response received from the API" });
-  //     } else {
-  //         // Something happened in setting up the request that triggered an Error
-  //         return res.status(500).send({ message: "Error fetching airport data" });
-  //     }
-  // }
+  try {
+    let { userdata } = req.body;
+    if (!userdata.id) {
+      return res.status(403).send({ message: "Not registered" });
+    }
+
+    const options = {
+      method: "GET",
+      url: "https://sky-scanner3.p.rapidapi.com/flights/airports",
+      headers: {
+        "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+        "x-rapidapi-host": "sky-scanner3.p.rapidapi.com",
+      },
+    };
+
+    const response = await axios.request(options);
+    return res.status(200).send(response.data);
+  } catch (error) {
+    console.error(error);
+    if (error.response) {
+      // The request was made, and the server responded with a status code
+      // that falls out of the range of 2xx
+
+      return res
+        .status(error.response.status)
+        .send({ message: error.response.data });
+    } else if (error.request) {
+      // The request was made, but no response was received
+      return res
+        .status(500)
+        .send({ message: "No response received from the API" });
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      return res.status(500).send({ message: "Error fetching airport data" });
+    }
+  }
 };
 
 const recharge = async (req, res) => {
