@@ -436,11 +436,10 @@ const addReview = async (req, res) => {
   }
 };
 
-// Helper function to generate review_id
-function generateReviewId() {
-  // Implement your own logic to generate review_id
-  // For example, using a random string or a combination of timestamp and user_id
-  return "REVID123"; // Example review_id
+async function generateReviewId() {
+  const maxId = await Review.max('review_id');
+  const sequence = maxId ? parseInt(maxId.substring(5), 10) + 1 : 1;
+  return `REVID${sequence.toString().padStart(3, '0')}`;
 }
 
 const getReviewsByUser = async (req, res) => {
