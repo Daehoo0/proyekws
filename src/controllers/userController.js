@@ -576,6 +576,41 @@ const updateGuideProfile = async (req, res) => {
 };
 
 
+const getDestination = async (req, res) => {
+  const fetch = (await import('node-fetch')).default;
+  const url = `https://api.geoapify.com/v2/places?categories=tourism&filter=circle:112.7415854,-7.2477332,10000&bias=proximity:112.7415854,-7.2477332&lang=en&limit=20&apiKey=aaf5dcf528bb422f87b422c837630612`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+  //   res.send(data);
+
+    const places = data.features.map(feature => {
+          return {
+              name: feature.properties.name,
+              country: feature.properties.country,
+              country_code: feature.properties.country_code,
+              region: feature.properties.region,
+              state: feature.properties.state,
+              city: feature.properties.city,
+              village: feature.properties.village,
+              postcode: feature.properties.postcode,
+              district: feature.properties.district,
+              neighbourhood: feature.properties.neighbourhood,
+              street: feature.properties.street,
+              formatted: feature.properties.formatted,
+              address_line1: feature.properties.address_line1,
+              address_line2: feature.properties.address_line2,
+              geometry: feature.geometry
+          };
+      });
+
+      res.json(places);
+
+  } catch (error) {
+    res.status(500).send('Error fetching data');
+  }
+}
+
 module.exports = {
   registerUser,
   loginUser,
@@ -589,4 +624,5 @@ module.exports = {
   getReviewsByUser,
   updateReview,
   updateGuideProfile,
+  getDestination,
 };

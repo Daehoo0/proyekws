@@ -14,6 +14,7 @@ const {
   getReviewsByUser,
   updateReview,
   updateGuideProfile,
+  getDestination,
 } = require("./controllers/userController");
 // const {upload} = require("./config/multer")
 app.use(express.json());
@@ -29,6 +30,8 @@ app.get("/api/events", [verifyToken], getEvents);
 app.post('/api/reviews', [verifyToken], addReview); 
 app.get('/api/reviews', [verifyToken], getReviewsByUser); 
 app.put('/api/reviews', [verifyToken], updateReview); 
+app.get("/api/destination", getDestination);
+
 // app.put('/api/guideProfile', [verifyToken], upload.single('photo'), updateGuideProfile); 
 
 const port = 3000;
