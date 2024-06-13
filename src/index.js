@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const database = require("./config/sequelize");
+const multer = require("./config/multer");
 const {
   registerUser,
   loginUser,
@@ -17,9 +18,9 @@ const {
   getDestination,
   deleteGuideProfile,
   registerForEvent,
-    cancelEventRegistration,
+  cancelEventRegistration,
 } = require("./controllers/userController");
-// const {upload} = require("./config/multer")
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,7 +39,7 @@ app.delete('/api/guideProfile', [verifyToken], deleteGuideProfile);
 app.post('/api/events/:event_id/register', [verifyToken], registerForEvent);
 app.delete('/api/events/:event_id/unregister', [verifyToken], cancelEventRegistration);
 
-// app.put('/api/guideProfile', [verifyToken], upload.single('photo'), updateGuideProfile); 
+app.put('/api/guideProfile', [verifyToken], multer.single('photo'), updateGuideProfile);
 
 const port = 3000;
 const init = async () => {

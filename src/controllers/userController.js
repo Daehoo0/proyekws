@@ -538,52 +538,60 @@ const updateReview = async (req, res) => {
 }
 
 const updateGuideProfile = async (req, res) => {
-    const schema = Joi.object({
-        location: Joi.string().required().messages({
-            'any.required': 'Location is required',
-        }),
-        experience: Joi.string().required().messages({
-            'any.required': 'Experience is required',
-        }),
-        rate: Joi.number().required().messages({
-            'any.required': 'Rate is required',
-            'number.base': 'Rate must be a number',
-        }),
-    });
+  const schema = Joi.object({
+      location: Joi.string().required().messages({
+          'any.required': 'Location is required',
+      }),
+      experience: Joi.string().required().messages({
+          'any.required': 'Experience is required',
+      }),
+      rate: Joi.number().required().messages({
+          'any.required': 'Rate is required',
+          'number.base': 'Rate must be a number',
+      }),
+      userdata: Joi.object({
+          id: Joi.number().required()
+      }).required()
+  });
 
-    try {
-        await schema.validateAsync(req.body);
+  try {
+      await schema.validateAsync(req.body);
 
-        const { location, experience, rate } = req.body;
-        const user_id = req.body.userdata.id;
+      const { location, experience, rate } = req.body;
+      const user_id = req.body.userdata.id;
 
-        const guide = await LocalGuide.findOne({ where: { user_id } });
-        if (!guide) {
-            return res.status(404).send({ message: 'Guide not found' });
-        }
+      const guide = await LocalGuide.findOne({ where: { user_id } });
+      if (!guide) {
+          return res.status(404).send({ message: 'Guide not found' });
+      }
 
-        let photo;
-        if (req.file) {
-            photo = req.file.path;
-        }
+      let photo;
+      if (req.file) {
+          photo = req.file.path;
+      }
 
-        await LocalGuide.update(
-            { location, experience, rate, photo },
-            { where: { user_id } }
-        );
+      await LocalGuide.update(
+          { location, experience, rate, photo },
+          { where: { user_id } }
+      );
 
-        res.status(200).json({
-            status: 200,
-            body: {
-                message: 'Profile updated successfully',
-            },
-        });
-    } catch (error) {
-        console.error('Error updating profile: ', error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
+      res.status(200).json({
+          status: 200,
+          body: {
+              message: 'Profile updated successfully',
+          },
+      });
+  } catch (error) {
+      if (error.isJoi) {
+          return res.status(400).json({
+              status: 400,
+              error: error.details.map(detail => detail.message).join(', ')
+          });
+      }
+      console.error('Error updating profile: ', error);
+      return res.status(500).json({ error: 'Internal server error' });
+  }
 };
-
 
 const getDestination = async (req, res) => {
   const fetch = (await import('node-fetch')).default;
