@@ -15,6 +15,7 @@ const {
   updateReview,
   updateGuideProfile,
 } = require("./controllers/userController");
+// const {upload} = require("./config/multer")
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
