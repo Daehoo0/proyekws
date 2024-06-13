@@ -1,12 +1,13 @@
 const express = require("express");
 const app = express();
 const database = require("./config/sequelize");
+const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
 const multer = require("./config/multer");
+const authRoutes = require('./routes/authRoutes');
+dotenv.config();
+
 const {
-  registerUser,
-  loginUser,
-  verifyToken,
-  deleteUser,
   getAirport,
   recharge,
   findPlace,
@@ -21,25 +22,26 @@ const {
   cancelEventRegistration,
 } = require("./controllers/userController");
 
+const { verifyToken } = require("./middlewares/authMiddleware"); 
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post("/api/register", registerUser);
-app.post("/api/login", loginUser);
-app.delete("/api/delete", [verifyToken], deleteUser);
-app.get("/api/getAirport", [verifyToken], getAirport);
-app.post("/api/recharge", [verifyToken], recharge);
-app.get("/api/findPlace", findPlace);
-app.get("/api/events", [verifyToken], getEvents);
-app.post('/api/reviews', [verifyToken], addReview); 
-app.get('/api/reviews', [verifyToken], getReviewsByUser); 
-app.put('/api/reviews', [verifyToken], updateReview); 
-app.get("/api/destination", getDestination);
-app.delete('/api/guideProfile', [verifyToken], deleteGuideProfile);
-app.post('/api/events/:event_id/register', [verifyToken], registerForEvent);
-app.delete('/api/events/:event_id/unregister', [verifyToken], cancelEventRegistration);
+app.use('/api', authRoutes);
 
-app.put('/api/guideProfile', [verifyToken], multer.single('photo'), updateGuideProfile);
+app.get("/api/getAirport", verifyToken, getAirport);
+app.post("/api/recharge", verifyToken, recharge);
+app.get("/api/findPlace", findPlace);
+app.get("/api/events", verifyToken, getEvents);
+app.post('/api/reviews', verifyToken, addReview); 
+app.get('/api/reviews', verifyToken, getReviewsByUser); 
+app.put('/api/reviews', verifyToken, updateReview); 
+app.get("/api/destination", getDestination);
+app.delete('/api/guideProfile', verifyToken, deleteGuideProfile);
+app.post('/api/events/:event_id/register', verifyToken, registerForEvent);
+app.delete('/api/events/:event_id/unregister', verifyToken, cancelEventRegistration);
+
+app.put('/api/guideProfile', verifyToken, multer.single('photo'), updateGuideProfile);
 
 const port = 3000;
 const init = async () => {
