@@ -148,7 +148,6 @@ const loginUser = async (req, res) => {
         "string.empty": "Password is required",
       }),
     });
-
     // Validate the request body
     const validation = await schema.validateAsync(req.body, {
       abortEarly: false,
@@ -171,6 +170,7 @@ const loginUser = async (req, res) => {
         },
       });
     }
+    console.log("lewat2")
 
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
@@ -179,6 +179,7 @@ const loginUser = async (req, res) => {
         message: "Invalid credentials",
       });
     }
+    console.log("lewat3")
 
     // Generate JWT token
     const token = jwt.sign(
@@ -186,6 +187,8 @@ const loginUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+    console.log("lewat4")
+
 
     res.status(200).json({
       status: 200,
