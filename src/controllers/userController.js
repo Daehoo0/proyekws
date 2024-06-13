@@ -477,6 +477,13 @@ const getReviewsByUser = async (req, res) => {
   }
 };
 
+const findReview = async (ulasan_id) => {
+  const review = await Review.findOne({ where: { review_id: ulasan_id } });
+  if (!review) {
+    throw new Error("Review not found");
+  }
+};
+
 const updateReview = async (req, res) => {
   // Define the Joi schema for validation
   const schema = Joi.object({
@@ -641,6 +648,53 @@ const deleteGuideProfile = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+async function generateRSVPId() {
+  const maxId = await Review.max("review_id");
+  const urutan = maxId ? Number(maxId.substr(3, 3)) + 1 : 1;
+  const review_id = `REV${urutan.toString().padStart(3, "0")}`;
+  return review_id;
+}
+
+const addRSVP = async (req,res) =>{
+  try {
+    const schema = Joi.object({
+      RSVP: Joi.string().external(find).required(),
+    });
+
+    // Validate the request body
+    await schema.validateAsync(req.body, { allowUnknown: true });
+
+    const { rating, review } = req.body;
+    const user_id = req.body.userdata.id;
+
+    const review_id = await generateReviewId(); // Await the async function
+
+    const currentDate = moment().format("YYYY-MM-DD HH:mm:ss");
+
+    // Create a new review
+    const newReview = await Review.create({
+      review_id,
+      user_id,
+      rating,
+      review,
+      createdAt: currentDate,
+      updatedAt: currentDate,
+    });
+
+    // Respond with success
+    res.status(201).json({
+      status: 201,
+      body: {
+        message: "Review added successfully",
+        review: newReview,
+      },
+    });
+  } catch (error) {
+    console.error("Error adding review: ", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
 
 module.exports = {
   registerUser,
