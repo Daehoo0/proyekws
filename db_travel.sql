@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS db_travel;
+CREATE DATABASE IF NOT EXISTS db_travels;
 
-USE db_travel;
+USE db_travels;
 
 DROP TABLE IF EXISTS traveler_profiles;
 DROP TABLE IF EXISTS guide_requests;
