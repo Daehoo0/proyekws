@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post("/api/register", registerUser);
 app.post("/api/login", loginUser);
-app.get("/api/delete", [verifyToken], deleteUser);
+app.delete("/api/delete", [verifyToken], deleteUser);
 app.get("/api/getAirport", [verifyToken], getAirport);
 app.post("/api/recharge", [verifyToken], recharge);
 app.get("/test", test);

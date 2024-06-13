@@ -163,14 +163,13 @@ const loginUser = async (req, res) => {
     // Find the user by username
     const user = await User.findOne({ where: { username } });
     if (!user) {
-      return res.status(400).json({
-        status: 400,
+      return res.status(404).json({
+        status: 404,
         body: {
           message: "User not found",
         },
       });
     }
-    console.log("lewat2")
 
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
@@ -179,7 +178,6 @@ const loginUser = async (req, res) => {
         message: "Invalid credentials",
       });
     }
-    console.log("lewat3")
 
     // Generate JWT token
     const token = jwt.sign(
@@ -187,8 +185,6 @@ const loginUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    console.log("lewat4")
-
 
     res.status(200).json({
       status: 200,
@@ -219,6 +215,12 @@ const verifyToken = async (req, res, next) => {
 const deleteUser = async (req, res) => {
   try {
     const { user_id } = req.body; // Assuming the ID is sent as 'user_id'
+    let token = req.header('x-auth-token')
+
+    let userdata = jwt.verify(token, process.env.JWT_SECRET)
+    if(userdata.id != user_id){
+        return res.status(403).json({ message: "Can't delete other user" });
+    }
 
     const user = await User.findOne({ where: { user_id } });
     if (!user) {
