@@ -12,6 +12,7 @@ const {
   getEvents,
   addReview,
   getReviewsByUser,
+  updateGuideProfile,
 } = require("./controllers/userController");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -25,6 +26,7 @@ app.get("/api/findPlace", findPlace);
 app.get("/api/events", [verifyToken], getEvents);
 app.post('/api/reviews', [verifyToken], addReview); 
 app.get('/api/reviews', [verifyToken], getReviewsByUser); 
+app.put('/api/guideProfile', [verifyToken], upload.single('photo'), updateGuideProfile); 
 
 const port = 3000;
 const init = async () => {

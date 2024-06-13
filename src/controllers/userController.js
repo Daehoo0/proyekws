@@ -1,5 +1,7 @@
 const User = require("../models/User");
 const Review = require("../models/Review");
+const multer = require('../config/multer');
+const LocalGuide  = require('../models/LocalGuide');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
@@ -315,7 +317,6 @@ const recharge = async (req, res) => {
   }
 };
 
-
 const findPlace = async (req, res) => {
   try {
     const clientId = process.env.CLIENT_ID;
@@ -477,6 +478,54 @@ const getReviewsByUser = async (req, res) => {
   }
 };
 
+const updateGuideProfile = async (req, res) => {
+    const schema = Joi.object({
+        location: Joi.string().required().messages({
+            'any.required': 'Location is required',
+        }),
+        experience: Joi.string().required().messages({
+            'any.required': 'Experience is required',
+        }),
+        rate: Joi.number().required().messages({
+            'any.required': 'Rate is required',
+            'number.base': 'Rate must be a number',
+        }),
+    });
+
+    try {
+        await schema.validateAsync(req.body);
+
+        const { location, experience, rate } = req.body;
+        const user_id = req.body.userdata.id;
+
+        const guide = await LocalGuide.findOne({ where: { user_id } });
+        if (!guide) {
+            return res.status(404).send({ message: 'Guide not found' });
+        }
+
+        let photo;
+        if (req.file) {
+            photo = req.file.path;
+        }
+
+        await LocalGuide.update(
+            { location, experience, rate, photo },
+            { where: { user_id } }
+        );
+
+        res.status(200).json({
+            status: 200,
+            body: {
+                message: 'Profile updated successfully',
+            },
+        });
+    } catch (error) {
+        console.error('Error updating profile: ', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
 module.exports = {
   registerUser,
   loginUser,
@@ -488,4 +537,5 @@ module.exports = {
   getEvents,
   addReview,
   getReviewsByUser,
+  updateGuideProfile,
 };
