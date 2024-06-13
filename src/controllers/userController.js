@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Review = require("../models/Review");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
@@ -405,43 +406,43 @@ const getEvents = async (req, res) => {
 
 const addReview = async (req, res) => {
   try {
-      const schema = Joi.object({
-          rating: Joi.number().integer().min(1).max(5).required(),
-          review: Joi.string().required(),
-      });
+    const schema = Joi.object({
+      rating: Joi.number().integer().min(1).max(5).required(),
+      review: Joi.string().required(),
+    });
 
-      const validation = await schema.validateAsync(req.body);
-      if (validation.error) {
-          const errors = validation.error.details.map(err => err.message);
-          return res.status(400).json({ errors });
-      }
+    const validation = await schema.validateAsync(req.body);
+    if (validation.error) {
+      const errors = validation.error.details.map((err) => err.message);
+      return res.status(400).json({ errors });
+    }
 
-      const { rating, review } = req.body;
-      const { user_id } = req.body.userdata;
+    const { rating, review } = req.body;
+    const { user_id } = req.body.userdata;
 
-      const review_id = generateReviewId(); // Assuming you have a function to generate review_id
+    const review_id = generateReviewId(); // Assuming you have a function to generate review_id
 
-      const currentDate = moment().format('YYYY-MM-DD HH:mm:ss');
+    const currentDate = moment().format("YYYY-MM-DD HH:mm:ss");
 
-      const newReview = await Review.create({
-          review_id,
-          user_id,
-          rating,
-          review,
-          created_at: currentDate,
-          update_at: currentDate,
-      });
+    const newReview = await Review.create({
+      review_id,
+      user_id,
+      rating,
+      review,
+      created_at: currentDate,
+      update_at: currentDate,
+    });
 
-      res.status(201).json({
-          status: 201,
-          body: {
-              message: 'Review added successfully',
-              review: newReview,
-          },
-      });
+    res.status(201).json({
+      status: 201,
+      body: {
+        message: "Review added successfully",
+        review: newReview,
+      },
+    });
   } catch (error) {
-      console.error('Error adding review: ', error);
-      return res.status(500).json({ error: 'Internal server error' });
+    console.error("Error adding review: ", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -449,41 +450,41 @@ const addReview = async (req, res) => {
 function generateReviewId() {
   // Implement your own logic to generate review_id
   // For example, using a random string or a combination of timestamp and user_id
-  return 'REVID123'; // Example review_id
+  return "REVID123"; // Example review_id
 }
 
 const getReviewsByUser = async (req, res) => {
   // Define the Joi schema for validation
   const schema = Joi.object({
-      user_id: Joi.string().required().messages({
-          "any.required": "User ID is required",
-          "string.empty": "User ID is required",
-      }),
+    user_id: Joi.string().required().messages({
+      "any.required": "User ID is required",
+      "string.empty": "User ID is required",
+    }),
   });
 
   // Validate the request body
   try {
-      await schema.validateAsync(req.body);
+    await schema.validateAsync(req.body);
   } catch (error) {
-      return res.status(400).json({
-          status: 400,
-          body: {
-              message: error.message,
-          },
-      });
+    return res.status(400).json({
+      status: 400,
+      body: {
+        message: error.message,
+      },
+    });
   }
 
   const { user_id } = req.body;
 
   try {
-      const reviews = await Review.findAll({ where: { user_id } });
-      res.status(200).json({
-          status: 200,
-          body: reviews,
-      });
+    const reviews = await Review.findAll({ where: { user_id } });
+    res.status(200).json({
+      status: 200,
+      body: reviews,
+    });
   } catch (error) {
-      console.error('Error fetching reviews: ', error);
-      return res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching reviews: ", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
