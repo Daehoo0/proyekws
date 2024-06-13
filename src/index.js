@@ -15,6 +15,7 @@ const {
   updateReview,
   updateGuideProfile,
   getDestination,
+  deleteGuideProfile,
 } = require("./controllers/userController");
 // const {upload} = require("./config/multer")
 app.use(express.json());
@@ -31,6 +32,7 @@ app.post('/api/reviews', [verifyToken], addReview);
 app.get('/api/reviews', [verifyToken], getReviewsByUser); 
 app.put('/api/reviews', [verifyToken], updateReview); 
 app.get("/api/destination", getDestination);
+app.delete('/api/guideProfile', verifyToken, deleteGuideProfile);
 
 // app.put('/api/guideProfile', [verifyToken], upload.single('photo'), updateGuideProfile); 
 

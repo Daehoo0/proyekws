@@ -611,6 +611,37 @@ const getDestination = async (req, res) => {
   }
 }
 
+const deleteGuideProfile = async (req, res) => {
+  const schema = Joi.object({
+    user_id: Joi.string().required().messages({
+      'any.required': 'User ID is required',
+    }),
+  });
+
+  try {
+    await schema.validateAsync(req.body);
+
+    const user_id = req.body.userdata.id;
+
+    const guide = await LocalGuide.findOne({ where: { user_id } });
+    if (!guide) {
+      return res.status(404).json({ message: 'Guide profile not found' });
+    }
+
+    await LocalGuide.destroy({ where: { user_id } });
+
+    res.status(200).json({
+      status: 200,
+      body: {
+        message: 'Guide profile deleted successfully',
+      },
+    });
+  } catch (error) {
+    console.error('Error deleting guide profile: ', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -625,4 +656,5 @@ module.exports = {
   updateReview,
   updateGuideProfile,
   getDestination,
+  deleteGuideProfile,
 };
