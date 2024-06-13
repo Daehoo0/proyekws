@@ -16,6 +16,8 @@ const {
   updateGuideProfile,
   getDestination,
   deleteGuideProfile,
+  registerForEvent,
+    cancelEventRegistration,
 } = require("./controllers/userController");
 // const {upload} = require("./config/multer")
 app.use(express.json());
@@ -32,7 +34,9 @@ app.post('/api/reviews', [verifyToken], addReview);
 app.get('/api/reviews', [verifyToken], getReviewsByUser); 
 app.put('/api/reviews', [verifyToken], updateReview); 
 app.get("/api/destination", getDestination);
-app.delete('/api/guideProfile', verifyToken, deleteGuideProfile);
+app.delete('/api/guideProfile', [verifyToken], deleteGuideProfile);
+app.post('/api/events/:event_id/register', [verifyToken], registerForEvent);
+app.delete('/api/events/:event_id/unregister', [verifyToken], cancelEventRegistration);
 
 // app.put('/api/guideProfile', [verifyToken], upload.single('photo'), updateGuideProfile); 
 
