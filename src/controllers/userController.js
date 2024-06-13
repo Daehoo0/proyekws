@@ -394,6 +394,13 @@ const getEvents = async (req, res) => {
   }
 };
 
+async function generateReviewId() {
+  const maxId = await Review.max("review_id");
+  const urutan = maxId ? Number(maxId.substr(3, 3)) + 1 : 1;
+  const review_id = `REV${urutan.toString().padStart(3, "0")}`;
+  return review_id;
+}
+
 const addReview = async (req, res) => {
   try {
     const schema = Joi.object({
@@ -401,28 +408,27 @@ const addReview = async (req, res) => {
       review: Joi.string().required(),
     });
 
-    const validation = await schema.validateAsync(req.body);
-    if (validation.error) {
-      const errors = validation.error.details.map((err) => err.message);
-      return res.status(400).json({ errors });
-    }
+    // Validate the request body
+    await schema.validateAsync(req.body, { allowUnknown: true });
 
     const { rating, review } = req.body;
-    const { user_id } = req.body.userdata;
+    const user_id = req.body.userdata.id;
 
-    const review_id = generateReviewId(); // Assuming you have a function to generate review_id
+    const review_id = await generateReviewId(); // Await the async function
 
     const currentDate = moment().format("YYYY-MM-DD HH:mm:ss");
 
+    // Create a new review
     const newReview = await Review.create({
       review_id,
       user_id,
       rating,
       review,
-      created_at: currentDate,
-      update_at: currentDate,
+      createdAt: currentDate,
+      updatedAt: currentDate,
     });
 
+    // Respond with success
     res.status(201).json({
       status: 201,
       body: {
@@ -435,12 +441,6 @@ const addReview = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
-async function generateReviewId() {
-  const maxId = await Review.max('review_id');
-  const sequence = maxId ? parseInt(maxId.substring(5), 10) + 1 : 1;
-  return `REVID${sequence.toString().padStart(3, '0')}`;
-}
 
 const getReviewsByUser = async (req, res) => {
   // Define the Joi schema for validation
@@ -476,6 +476,57 @@ const getReviewsByUser = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+const updateReview = async (req, res) => {
+  // Define the Joi schema for validation
+  const schema = Joi.object({
+    ulasan_id: Joi.string().external(findReview).required(),
+    rating: Joi.number().integer().min(1).max(5).required(),
+    review: Joi.string().required(),
+  });
+
+  // Validate the request body
+  try {
+    await schema.validateAsync(req.body, { allowUnknown: true });
+  } catch (error) {
+    return res.status(400).json({
+      status: 400,
+      body: {
+        message: error.message,
+      },
+    });
+  }
+
+  const { ulasan_id, rating, review } = req.body;
+
+  try {
+    // Update the review
+    const [updated] = await Review.update(
+      { rating: rating, review: review },
+      { where: { review_id: ulasan_id } }
+    );
+
+    // Check if any review was updated
+    if (updated) {
+      const updatedReview = await Review.findOne({ where: { review_id: ulasan_id } });
+      return res.status(200).json({
+        status: 200,
+        body: updatedReview,
+      });
+    }
+
+    // If no review was found to update
+    return res.status(404).json({
+      status: 404,
+      body: {
+        message: "Review not found",
+      },
+    });
+  } catch (error) {
+    console.error("Error updating review: ", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
 
 const updateGuideProfile = async (req, res) => {
     const schema = Joi.object({
@@ -536,5 +587,6 @@ module.exports = {
   getEvents,
   addReview,
   getReviewsByUser,
+  updateReview,
   updateGuideProfile,
 };
