@@ -29,7 +29,7 @@ app.get("/api/events", [verifyToken], getEvents);
 app.post('/api/reviews', [verifyToken], addReview); 
 app.get('/api/reviews', [verifyToken], getReviewsByUser); 
 app.put('/api/reviews', [verifyToken], updateReview); 
-app.put('/api/guideProfile', [verifyToken], upload.single('photo'), updateGuideProfile); 
+// app.put('/api/guideProfile', [verifyToken], upload.single('photo'), updateGuideProfile); 
 
 const port = 3000;
 const init = async () => {
