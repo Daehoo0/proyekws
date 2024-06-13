@@ -279,58 +279,42 @@ const getAirport = async (req, res) => {
 
 const recharge = async (req, res) => {
   try {
-    let { userdata } = req.body;
-    if (!userdata.id) {
-      return res.status(403).send({ message: "Not registered" });
-    }
+    let { userdata, money } = req.body;
 
-    let { money } = req.body;
-    if (typeof money !== "number" || money <= 0) {
+    // Validate the recharge amount
+    if ( isNaN(money) || !isFinite(money) || money <= 0) {
       return res.status(400).send({ message: "Invalid amount" });
     }
 
-    const user = await User.findOne({ where: { user_id: userdata.user_id } });
+    // Find the user by user_id
+    const user = await User.findOne({ where: { user_id: userdata.id } });
     if (!user) {
       return res.status(404).send({ message: "User not found" });
     }
 
-    let newBalance = user.balance + money;
-
+    // Calculate new balance and update user's balance
+    let newBalance = parseInt(user.balance) + parseInt(money);
     await User.update(
       { balance: newBalance },
-      { where: { user_id: userdata.user_id } }
+      { where: { user_id: userdata.id } }
     );
 
+    // Respond with success message and current balance
     return res.status(200).send({ message: "Saldomu saat ini: " + newBalance });
+
   } catch (error) {
     console.error(error);
 
+    // Handle specific errors
     if (error.name === "JsonWebTokenError") {
       return res.status(403).send({ message: "Invalid token" });
     }
 
+    // Handle other errors
     return res.status(500).send({ message: "Server error" });
   }
 };
 
-const test = async (req, res) => {
-  const options = {
-    method: "GET",
-    url: "https://tripadvisor16.p.rapidapi.com/api/v1/test",
-    headers: {
-      "x-rapidapi-key": "2865e812acmshff540095f57d8f1p1e65b1jsn051cd0912cae",
-      "x-rapidapi-host": "tripadvisor16.p.rapidapi.com",
-    },
-  };
-
-  try {
-    const response = await axios.request(options);
-    console.log(response.data);
-    return res.status(200).send(response.data);
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 const findPlace = async (req, res) => {
   try {
@@ -500,7 +484,6 @@ module.exports = {
   deleteUser,
   getAirport,
   recharge,
-  test,
   findPlace,
   getEvents,
   addReview,

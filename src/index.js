@@ -8,7 +8,6 @@ const {
   deleteUser,
   getAirport,
   recharge,
-  test,
   findPlace,
   getEvents,
   addReview,
@@ -22,7 +21,6 @@ app.post("/api/login", loginUser);
 app.delete("/api/delete", [verifyToken], deleteUser);
 app.get("/api/getAirport", [verifyToken], getAirport);
 app.post("/api/recharge", [verifyToken], recharge);
-app.get("/test", test);
 app.get("/api/findPlace", findPlace);
 app.get("/api/events", [verifyToken], getEvents);
 app.post('/api/reviews', [verifyToken], addReview); 
