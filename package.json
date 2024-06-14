@@ -1,9 +1,9 @@
 {
   "name": "proyekws",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "src",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src"
   },
   "keywords": [],
   "author": "",
