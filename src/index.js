@@ -22,26 +22,26 @@ const {
   cancelEventRegistration,
 } = require("./controllers/userController");
 
-const { verifyToken } = require("./middlewares/authMiddleware"); 
+const { verifyToken, verifyAccess } = require("./middlewares/authMiddleware"); 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api', authRoutes);
 
-app.get("/api/getAirport", verifyToken, getAirport);
-app.post("/api/recharge", verifyToken, recharge);
+app.get("/api/getAirport", [verifyToken, verifyAccess], getAirport);
+app.post("/api/recharge", [verifyToken], recharge);
 app.get("/api/findPlace", findPlace);
-app.get("/api/events", verifyToken, getEvents);
-app.post('/api/reviews', verifyToken, addReview); 
-app.get('/api/reviews', verifyToken, getReviewsByUser); 
-app.put('/api/reviews', verifyToken, updateReview); 
+app.get("/api/events", [verifyToken, verifyAccess], getEvents);
+app.post('/api/reviews', [verifyToken, verifyAccess], addReview); 
+app.get('/api/reviews', [verifyToken, verifyAccess], getReviewsByUser); 
+app.put('/api/reviews', [verifyToken, verifyAccess], updateReview); 
 app.get("/api/destination", getDestination);
-app.delete('/api/guideProfile', verifyToken, deleteGuideProfile);
-app.post('/api/events/:event_id/register', verifyToken, registerForEvent);
-app.delete('/api/events/:event_id/unregister', verifyToken, cancelEventRegistration);
+app.delete('/api/guideProfile', [verifyToken, verifyAccess], deleteGuideProfile);
+app.post('/api/events/:event_id/register', [verifyToken, verifyAccess], registerForEvent);
+app.delete('/api/events/:event_id/unregister', [verifyToken, verifyAccess], cancelEventRegistration);
 
-app.put('/api/guideProfile', verifyToken, multer.single('photo'), updateGuideProfile);
+app.put('/api/guideProfile', [verifyToken, verifyAccess], multer.single('photo'), updateGuideProfile);
 
 const port = 3000;
 const init = async () => {
