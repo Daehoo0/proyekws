@@ -180,7 +180,7 @@ const loginUser = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user.user_id, role: user.role },
+      { id: user.user_id, role: user.role, balance: user.balance, api_hit: user.api_hit },
       process.env.JWT_SECRET, // Use the secret key from .env
       { expiresIn: "1h" }
     );
@@ -189,6 +189,8 @@ const loginUser = async (req, res) => {
       status: 200,
       body: {
         username: user.username,
+        balance: user.balance, 
+        api_hit: user.api_hit,
         token,
       },
     });
