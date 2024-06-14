@@ -20,6 +20,7 @@ const {
   deleteGuideProfile,
   registerForEvent,
   cancelEventRegistration,
+  addEvent
 } = require("./controllers/userController");
 
 const { verifyToken, verifyAccess } = require("./middlewares/authMiddleware"); 
@@ -40,7 +41,7 @@ app.get("/api/destination", getDestination);
 app.delete('/api/guideProfile', [verifyToken, verifyAccess], deleteGuideProfile);
 app.post('/api/events/:event_id/register', [verifyToken, verifyAccess], registerForEvent);
 app.delete('/api/events/:event_id/unregister', [verifyToken, verifyAccess], cancelEventRegistration);
-
+app.post('/api/events', [verifyToken, verifyAccess], addEvent)
 app.put('/api/guideProfile', [verifyToken, verifyAccess], multer.single('photo'), updateGuideProfile);
 
 const port = 3000;

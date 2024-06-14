@@ -122,6 +122,67 @@ const findPlace = async (req, res) => {
   }
 };
 
+async function generateEventId() {
+  const maxId = await Event.max("event_id");
+  const urutan = maxId ? Number(maxId.substr(3, 3)) + 1 : 1;
+  const event_id = `EVE${urutan.toString().padStart(3, "0")}`;
+  return event_id;
+}
+
+const addEvent = async (req, res) => {
+  try {
+    const { userdata } = req.body;
+    if (!userdata || !userdata.id) {
+      return res.status(403).send({ message: "Not registered" });
+    }
+
+    const schema = Joi.object({
+      name: Joi.string().required(),
+      category: Joi.string().required(),
+      location: Joi.string().required(),
+      event_time: Joi.date().required(),
+      description: Joi.string().required(),
+    });
+
+    await schema.validateAsync(req.body, { allowUnknown: true });
+
+    const { name, category, location, event_time, description } = req.body;
+    const organizer = userdata.id;
+
+    const event_id = await generateEventId(); // Await the async function
+
+    const currentDate = new Date();
+
+    const newEvent = await Event.create({
+      event_id,
+      organizer_id: organizer,
+      event_name: name,
+      category,
+      location,
+      event_time,
+      description,
+      photo: "sample.png",
+      createdAt: currentDate,
+      updatedAt: currentDate,
+    });
+
+    res.status(201).json({
+      status: 201,
+      body: {
+        message: "Event added successfully",
+        event: newEvent,
+      },
+    });
+  } catch (error) {
+    if (error.isJoi) {
+      const errors = error.details.map((err) => err.message);
+      return res.status(400).json({ errors });
+    }
+    console.error("Error adding events: ", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 const getEvents = async (req, res) => {
   try {
     const { userdata } = req.body;
@@ -590,4 +651,5 @@ module.exports = {
   deleteGuideProfile,
   registerForEvent,
   cancelEventRegistration,
+  addEvent
 };
