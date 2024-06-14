@@ -3,13 +3,10 @@ const Sequelize = require("sequelize");
 const db = new Sequelize(
   "db_travels", //database name
   "root", //database username
-  "", //database password
+  process.env.SQL_PASSWORD, //database password
   {
-    host: "localhost", //database host
-    port: 3306, //default MySQL port
+    host: "34.128.72.254", //database host
     dialect: "mysql",
-    logging: true,
-    timezone: "+07:00",
   }
 );
 

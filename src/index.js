@@ -67,7 +67,9 @@ const init = async () => {
     await database.authenticate();
     console.log("Database successfully connected!");
     app.listen(port, function () {
-      console.log(`Application is running at http://localhost:${port}`);
+      console.log(
+        `Application is running at https://majestic-energy-426401-g7.et.r.appspot.com:${port}`
+      );
     });
   } catch (error) {
     console.log(error);
