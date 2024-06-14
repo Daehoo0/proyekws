@@ -1,53 +1,49 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { User } = require('../models');
 
 const registerUser = async (req, res) => {
   try {
-    const { username, password, email, role } = req.body;
+    const { username, password, email } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
-      user_id: 'UID' + new Date().getTime(),
+
+    const user = await User.create({
+      user_id: 'UID' + Date.now(), // Replace with your own ID generation logic
       username,
       password: hashedPassword,
       email,
-      role,
+      role: 'traveler', // Default role for registration
       balance: 0,
     });
-    res.status(201).json(newUser);
+
+    res.status(201).json({ message: 'User registered successfully', user });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
+
     const user = await User.findOne({ where: { username } });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      return res.status(404).json({ error: 'User not found' });
     }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
-    const token = jwt.sign({ id: user.user_id }, process.env.JWT_SECRET, {
+
+    const token = jwt.sign({ user_id: user.user_id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
-    res.json({ token });
+
+    res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-const deleteUser = async (req, res) => {
-  try {
-    const { user_id } = req.body;
-    await User.destroy({ where: { user_id } });
-    res.status(200).json({ message: 'User deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-module.exports = { registerUser, loginUser, deleteUser };
+module.exports = { registerUser, loginUser };
