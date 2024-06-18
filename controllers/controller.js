@@ -53,37 +53,40 @@ const register = async (req, res) => {
   }
 
   // Cek username unik
-  let existingUser;
-  if (role === 'traveler') {
-    existingUser = await Traveler.findOne({ where: { username } });
-  } else if (role === 'guide') {
-    existingUser = await Guide.findOne({ where: { username } });
-  } else if (role === 'organizer') {
-    existingUser = await Organizer.findOne({ where: { username } });
-  }
-
-  if (existingUser) {
-    return res.status(400).json({ error: 'Username sudah digunakan' });
-  }
-
-  // Generate ID
-  const id = await generateId(role);
-
-  // Buat pengguna baru
   try {
+    let existingUser;
+    if (role === 'traveler') {
+      existingUser = await Traveler.findOne({ where: { username } });
+    } else if (role === 'guide') {
+      existingUser = await Guide.findOne({ where: { username } });
+    } else if (role === 'organizer') {
+      existingUser = await Organizer.findOne({ where: { username } });
+    }
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username sudah digunakan' });
+    }
+
+    // Generate ID
+    const id = await generateId(role);
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Buat pengguna baru
     let newUser;
     if (role === 'traveler') {
       newUser = await Traveler.create({
         traveler_id: id,
         username,
-        password,
+        password: hashedPassword,
         saldo: 0,
       });
     } else if (role === 'guide') {
       newUser = await Guide.create({
         guide_id: id,
         username,
-        password,
+        password: hashedPassword,
         location: '',
         experience: '',
         rate: 0,
@@ -93,14 +96,61 @@ const register = async (req, res) => {
       newUser = await Organizer.create({
         organizer_id: id,
         username,
-        password,
+        password: hashedPassword,
         rate: 0,
         saldo: 0,
       });
     }
+
     res.json(newUser);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Terjadi kesalahan saat registrasi' });
   }
 };
-module.exports = { register };
+
+// Schema validasi dengan Joi
+const loginSchema = Joi.object({
+  username: Joi.string().min(3).required(),
+  password: Joi.string().min(6).required(),
+});
+
+const login = async (req, res) => {
+  // Validasi data input
+  const { error, value } = loginSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  const { username, password } = value;
+
+  try {
+    // Cari pengguna berdasarkan username
+    const user = await Traveler.findOne({ where: { username } })
+      || await Guide.findOne({ where: { username } })
+      || await Organizer.findOne({ where: { username } });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Username atau password salah' });
+    }
+
+    // Verifikasi password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Username atau password salah' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user.traveler_id || user.guide_id || user.organizer_id, username: user.username, role: user.constructor.name.toLowerCase() },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({ message: 'Berhasil login', token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Terjadi kesalahan saat login' });
+  }
+};
+module.exports = { register , login };
