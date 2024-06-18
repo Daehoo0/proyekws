@@ -1,6 +1,12 @@
-const { TravelerProfile, GuideRequest, Event, Review, Payment, User } = require('../models');
-const Joi = require('joi');
-const axios = require('axios');
+const {
+  TravelerProfile,
+  GuideRequest,
+  Event,
+  Review,
+  Payment,
+  User,
+} = require("../models");
+const Joi = require("joi");
 
 const createProfileSchema = Joi.object({
   user_id: Joi.string().required(),
@@ -30,13 +36,16 @@ const paymentSchema = Joi.object({
 const createProfile = async (req, res) => {
   try {
     const { error } = createProfileSchema.validate(req.body);
-    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+    if (error)
+      return res
+        .status(400)
+        .json({ status: 400, message: error.details[0].message });
 
     const profile = await TravelerProfile.create(req.body);
 
     return res.status(201).json({
       status: 201,
-      message: 'Profil perjalanan berhasil dibuat',
+      message: "Profil perjalanan berhasil dibuat",
       data: {
         profile: {
           profile_id: profile.profile_id,
@@ -45,9 +54,9 @@ const createProfile = async (req, res) => {
           travel_time: profile.travel_time,
           interests: profile.interests,
           createdAt: profile.createdAt,
-          updatedAt: profile.updatedAt
-        }
-      }
+          updatedAt: profile.updatedAt,
+        },
+      },
     });
   } catch (error) {
     return res.status(500).json({ status: 500, message: error.message });
@@ -62,9 +71,9 @@ const searchTravelers = async (req, res) => {
       where: {
         destination,
         travel_time,
-        interests
+        interests,
       },
-      include: [User]
+      include: [User],
     });
 
     return res.status(200).json({ status: 200, data: travelers });
@@ -76,14 +85,17 @@ const searchTravelers = async (req, res) => {
 const sendRequestToGuide = async (req, res) => {
   try {
     const { error } = requestSchema.validate(req.body);
-    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+    if (error)
+      return res
+        .status(400)
+        .json({ status: 400, message: error.details[0].message });
 
     const guideRequest = await GuideRequest.create(req.body);
 
     return res.status(201).json({
       status: 201,
-      message: 'Permintaan berhasil dikirim',
-      data: guideRequest
+      message: "Permintaan berhasil dikirim",
+      data: guideRequest,
     });
   } catch (error) {
     return res.status(500).json({ status: 500, message: error.message });
@@ -98,8 +110,8 @@ const searchEvents = async (req, res) => {
       where: {
         destination,
         category,
-        event_time: time
-      }
+        event_time: time,
+      },
     });
 
     return res.status(200).json({ status: 200, data: events });
@@ -111,14 +123,17 @@ const searchEvents = async (req, res) => {
 const giveReview = async (req, res) => {
   try {
     const { error } = reviewSchema.validate(req.body);
-    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+    if (error)
+      return res
+        .status(400)
+        .json({ status: 400, message: error.details[0].message });
 
     const review = await Review.create(req.body);
 
     return res.status(201).json({
       status: 201,
-      message: 'Ulasan berhasil diberikan',
-      data: review
+      message: "Ulasan berhasil diberikan",
+      data: review,
     });
   } catch (error) {
     return res.status(500).json({ status: 500, message: error.message });
@@ -128,56 +143,28 @@ const giveReview = async (req, res) => {
 const makePayment = async (req, res) => {
   try {
     const { error } = paymentSchema.validate(req.body);
-    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+    if (error)
+      return res
+        .status(400)
+        .json({ status: 400, message: error.details[0].message });
 
     const payment = await Payment.create(req.body);
 
     return res.status(201).json({
       status: 201,
-      message: 'Pembayaran berhasil',
-      data: payment
+      message: "Pembayaran berhasil",
+      data: payment,
     });
   } catch (error) {
     return res.status(500).json({ status: 500, message: error.message });
   }
 };
 
-const getDestination = async (req, res) => {
-  const url = `https://api.geoapify.com/v2/places?categories=tourism&filter=circle:112.7415854,-7.2477332,10000&bias=proximity:112.7415854,-7.2477332&lang=en&limit=20&apiKey=dde4de0051c34511a2d00ff8f1b0abba`;
-
-  try {
-    const response = await axios.get(url);
-    const data = response.data;
-
-    const places = data.features.map(feature => ({
-      name: feature.properties.name,
-      country: feature.properties.country,
-      country_code: feature.properties.country_code,
-      region: feature.properties.region,
-      state: feature.properties.state,
-      city: feature.properties.city,
-      village: feature.properties.village,
-      postcode: feature.properties.postcode,
-      district: feature.properties.district,
-      neighbourhood: feature.properties.neighbourhood,
-      street: feature.properties.street,
-      formatted: feature.properties.formatted,
-      address_line1: feature.properties.address_line1,
-      address_line2: feature.properties.address_line2,
-      geometry: feature.geometry
-    }));
-
-    res.status(200).json({
-      status: 200,
-      data: places
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 500,
-      message: 'Error fetching data',
-      error: error.message
-    });
-  }
+module.exports = {
+  createProfile,
+  searchTravelers,
+  sendRequestToGuide,
+  searchEvents,
+  giveReview,
+  makePayment,
 };
-
-module.exports = { createProfile, searchTravelers, sendRequestToGuide, searchEvents, giveReview, makePayment, getDestination };

@@ -1,6 +1,9 @@
 const { Event, EventParticipant, Payment } = require("../models");
 const Joi = require("joi");
 const moment = require("moment");
+const axios = require("axios");
+const { apikeys } = require("googleapis/build/src/apis/apikeys");
+require("dotenv").config();
 
 const itinerarySchema = Joi.object({
   user_id: Joi.string().required(),
@@ -13,7 +16,7 @@ const eventSchema = Joi.object({
   category: Joi.string().optional(),
   location: Joi.string().required(),
   event_time: Joi.date().required(),
-  description: Joi.string().optional()
+  description: Joi.string().optional(),
 });
 
 const participantSchema = Joi.object({
@@ -79,14 +82,48 @@ const inviteTraveler = async (req, res) => {
 
 const createEvent = async (req, res) => {
   try {
-    if (req.user.role !== 'organizer') {
-      return res.status(403).json({ status: 403, message: 'Unauthorized access' });
+    if (req.user.role !== "organizer") {
+      return res
+        .status(403)
+        .json({ status: 403, message: "Unauthorized access" });
     }
 
     const { error } = eventSchema.validate(req.body);
-    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+    if (error)
+      return res
+        .status(400)
+        .json({ status: 400, message: error.details[0].message });
 
     const photo = req.file ? req.file.filename : null;
+
+    const apiKey = process.env.GEOAPIFY_API_KEY;
+    const radius = 10000;
+    const limit = 20;
+    const latitude = 112.7415854;
+    const longitude = -7.2477332;
+
+    const url = `https://api.geoapify.com/v2/places?categories=tourism&filter=circle:${latitude},${longitude},${radius}&bias=proximity:${latitude},${longitude}&lang=en&limit=${limit}&apiKey=${apiKey}`;
+
+    const response = await axios.get(url);
+    const feature = response.data.features[0];
+
+    const location = {
+      name: feature.properties.name,
+      country: feature.properties.country,
+      country_code: feature.properties.country_code,
+      region: feature.properties.region,
+      state: feature.properties.state,
+      city: feature.properties.city,
+      village: feature.properties.village,
+      postcode: feature.properties.postcode,
+      district: feature.properties.district,
+      neighbourhood: feature.properties.neighbourhood,
+      street: feature.properties.street,
+      formatted: feature.properties.formatted,
+      address_line1: feature.properties.address_line1,
+      address_line2: feature.properties.address_line2,
+      geometry: feature.geometry
+    };
 
     const eventId = await generateEventId();
 
@@ -95,7 +132,7 @@ const createEvent = async (req, res) => {
       organizer_id: req.user.user_id,
       event_name: req.body.event_name,
       category: req.body.category,
-      location: req.body.location,
+      location: location.formatted,
       event_time: req.body.event_time,
       description: req.body.description,
       photo: photo,
@@ -103,25 +140,25 @@ const createEvent = async (req, res) => {
 
     return res.status(201).json({
       status: 201,
-      message: 'Acara berhasil dibuat',
+      message: "Acara berhasil dibuat",
       data: {
+        // event,
         event_id: event.event_id,
         organizer_id: event.organizer_id,
         event_name: event.event_name,
         category: event.category,
         location: event.location,
-        event_time: moment(event.event_time).format('YYYY-MM-DD HH:mm:ss'),
+        event_time: moment(event.event_time).format("YYYY-MM-DD HH:mm:ss"),
         description: event.description,
         photo: event.photo,
-        createdAt: moment(event.createdAt).format('YYYY-MM-DD HH:mm:ss'),
-        updatedAt: moment(event.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+        createdAt: moment(event.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+        updatedAt: moment(event.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
       },
     });
   } catch (error) {
     return res.status(500).json({ status: 500, message: error.message });
   }
 };
-
 
 const manageParticipants = async (req, res) => {
   try {
@@ -180,7 +217,52 @@ const managePayments = async (req, res) => {
   }
 };
 
+const getDestination = async (req, res) => {
+  const apiKey = process.env.GEOAPIFY_API_KEY;
+  const radius = 10000;
+  const limit = 20;
+  const latitude = 112.7415854;
+  const longitude = -7.2477332;
+
+  const url = `https://api.geoapify.com/v2/places?categories=tourism&filter=circle:${latitude},${longitude},${radius}&bias=proximity:${latitude},${longitude}&lang=en&limit=${limit}&apiKey=${apiKey}`;
+
+  try {
+    const response = await axios.get(url);
+    const data = response.data;
+
+    const places = data.features.map((feature) => ({
+      name: feature.properties.name,
+      country: feature.properties.country,
+      country_code: feature.properties.country_code,
+      region: feature.properties.region,
+      state: feature.properties.state,
+      city: feature.properties.city,
+      village: feature.properties.village,
+      postcode: feature.properties.postcode,
+      district: feature.properties.district,
+      neighbourhood: feature.properties.neighbourhood,
+      street: feature.properties.street,
+      formatted: feature.properties.formatted,
+      address_line1: feature.properties.address_line1,
+      address_line2: feature.properties.address_line2,
+      geometry: feature.geometry,
+    }));
+
+    res.status(200).json({
+      status: 200,
+      data: places,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error fetching data",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
+  getDestination,
   createItinerary,
   inviteTraveler,
   createEvent,
