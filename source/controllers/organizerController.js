@@ -96,7 +96,8 @@ const createEvent = async (req, res) => {
 
     const photo = req.file ? req.file.filename : null;
 
-    const apiKey = process.env.GEOAPIFY_API_KEY;
+    // const apiKey = process.env.GEOAPIFY_API_KEY;
+    const apiKey = dde4de0051c34511a2d00ff8f1b0abba;
     const radius = 10000;
     const limit = 20;
     const latitude = 112.7415854;

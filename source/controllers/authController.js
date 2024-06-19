@@ -104,16 +104,27 @@ const login = async (req, res) => {
 
 const topUpBalance = async (req, res) => {
   try {
+    console.log("Top-up request received:", req.body);
+    
     const { amount } = req.body;
 
     const { error } = topUpSchema.validate(req.body);
-    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+    if (error) {
+      console.log("Validation error:", error.details[0].message);
+      return res.status(400).json({ status: 400, message: error.details[0].message });
+    }
 
+    console.log("Token payload:", req.user);
     const user = await User.findByPk(req.user.id);
-    if (!user) return res.status(404).json({ status: 404, message: 'User not found' });
+    if (!user) {
+      console.log("User not found");
+      return res.status(404).json({ status: 404, message: 'User not found' });
+    }
 
-    user.balance += parseInt(amount, 10); // Pastikan jumlah ditambahkan sebagai integer
+    user.balance += parseInt(amount, 10);
     await user.save();
+
+    console.log("Balance updated successfully");
 
     return res.status(200).json({
       status: 200,
@@ -131,6 +142,7 @@ const topUpBalance = async (req, res) => {
       }
     });
   } catch (error) {
+    console.log("Error occurred:", error.message);
     return res.status(500).json({ status: 500, message: error.message });
   }
 };
