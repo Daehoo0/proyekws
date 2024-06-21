@@ -1,11 +1,11 @@
 const { User } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const Joi = require("joi");
-require('dotenv').config();
-
 const moment = require("moment");
+const Joi = require("joi");
+require("dotenv").config();
 
+// ===== Schema =====
 const registerSchema = Joi.object({
   username: Joi.string().min(3).max(30).required(),
   email: Joi.string().email().required(),
@@ -22,6 +22,15 @@ const topUpSchema = Joi.object({
   amount: Joi.number().integer().min(1).required(),
 });
 
+const updateUserSchema = Joi.object({
+  username: Joi.string().min(3).max(30).optional(),
+  email: Joi.string().email().optional(),
+  password: Joi.string().min(6).optional(),
+  role: Joi.string().valid("traveler", "guide", "organizer").optional(),
+});
+
+
+// ===== Controllers =====
 const generateUserId = async () => {
   const users = await User.findAll({
     attributes: ["user_id"],
@@ -38,7 +47,10 @@ const generateUserId = async () => {
 };
 
 function formatRupiah(number) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number).replace('IDR', 'Rp').replace(',00', ',00');
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" })
+    .format(number)
+    .replace("IDR", "Rp")
+    .replace(",00", ",00");
 }
 
 const register = async (req, res) => {
@@ -86,15 +98,28 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     const { error } = loginSchema.validate(req.body);
-    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+    if (error)
+      return res
+        .status(400)
+        .json({ status: 400, message: error.details[0].message });
 
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(401).json({ status: 401, message: 'Email atau password salah' });
+    if (!user)
+      return res
+        .status(401)
+        .json({ status: 401, message: "Email atau password salah" });
 
     const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) return res.status(401).json({ status: 401, message: 'Email atau password salah' });
+    if (!validPassword)
+      return res
+        .status(401)
+        .json({ status: 401, message: "Email atau password salah" });
 
-    const token = jwt.sign({ id: user.user_id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { id: user.user_id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
     return res.status(200).json({ status: 200, email: user.email, token });
   } catch (error) {
@@ -105,20 +130,22 @@ const login = async (req, res) => {
 const topUpBalance = async (req, res) => {
   try {
     console.log("Top-up request received:", req.body);
-    
+
     const { amount } = req.body;
 
     const { error } = topUpSchema.validate(req.body);
     if (error) {
       console.log("Validation error:", error.details[0].message);
-      return res.status(400).json({ status: 400, message: error.details[0].message });
+      return res
+        .status(400)
+        .json({ status: 400, message: error.details[0].message });
     }
 
     console.log("Token payload:", req.user);
-    const user = await User.findByPk(req.user.id);
+    const user = await User.findByPk(req.user.user_id);
     if (!user) {
       console.log("User not found");
-      return res.status(404).json({ status: 404, message: 'User not found' });
+      return res.status(404).json({ status: 404, message: "User not found" });
     }
 
     user.balance += parseInt(amount, 10);
@@ -128,7 +155,7 @@ const topUpBalance = async (req, res) => {
 
     return res.status(200).json({
       status: 200,
-      message: 'Balance successfully topped up',
+      message: "Balance successfully topped up",
       data: {
         user: {
           user_id: user.user_id,
@@ -137,9 +164,9 @@ const topUpBalance = async (req, res) => {
           email: user.email,
           balance: formatRupiah(user.balance),
           createdAt: moment(user.createdAt).format("YYYY-MM-DD HH:mm:ss"),
-          updatedAt: moment(user.updatedAt).format("YYYY-MM-DD HH:mm:ss")
-        }
-      }
+          updatedAt: moment(user.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
+        },
+      },
     });
   } catch (error) {
     console.log("Error occurred:", error.message);
@@ -147,4 +174,64 @@ const topUpBalance = async (req, res) => {
   }
 };
 
-module.exports = { register, login, topUpBalance};
+const updateUser = async (req, res) => {
+  try {
+    const { error } = updateUserSchema.validate(req.body);
+    if (error)
+      return res
+        .status(400)
+        .json({ status: 400, message: error.details[0].message });
+
+    const user = await User.findByPk(req.user.user_id);
+    if (!user) {
+      return res.status(404).json({ status: 404, message: "User not found" });
+    }
+
+    if (req.body.username) user.username = req.body.username;
+    if (req.body.email) user.email = req.body.email;
+    if (req.body.password) user.password = await bcrypt.hash(req.body.password, 10);
+    if (req.body.role) user.role = req.body.role;
+
+    await user.save();
+
+    return res.status(200).json({
+      status: 200,
+      message: "User updated successfully",
+      data: {
+        user: {
+          user_id: user.user_id,
+          username: user.username,
+          role: user.role,
+          email: user.email,
+          balance: formatRupiah(user.balance),
+          createdAt: moment(user.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+          updatedAt: moment(user.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
+        },
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll();
+    return res.status(200).json({
+      status: 200,
+      data: users.map(user => ({
+        user_id: user.user_id,
+        username: user.username,
+        role: user.role,
+        email: user.email,
+        balance: formatRupiah(user.balance),
+        createdAt: moment(user.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+        updatedAt: moment(user.updatedAt).format("YYYY-MM-DD HH:mm:ss")
+      }))
+    });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+
+module.exports = { register, login, topUpBalance, updateUser, getAllUsers };

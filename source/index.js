@@ -14,7 +14,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use('/api/auth', authRoutes);
+app.use('/api', authRoutes);
 app.use('/api/travelers', travelerRoutes);
 app.use('/api/guides', guideRoutes);
 app.use('/api/organizers', organizerRoutes);
