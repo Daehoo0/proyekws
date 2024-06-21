@@ -2,7 +2,7 @@ const { Event, EventParticipant, Payment } = require("../models");
 const Joi = require("joi");
 const moment = require("moment");
 const axios = require("axios");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 
 const destinations = [];
@@ -13,7 +13,7 @@ const eventSchema = Joi.object({
   category: Joi.string().optional(),
   event_time: Joi.date().required(),
   description: Joi.string().optional(),
-  price: Joi.number().required()
+  price: Joi.number().required(),
 });
 
 const participantSchema = Joi.object({
@@ -37,7 +37,51 @@ const generateEventId = async () => {
   return `E${number.toString().padStart(3, "0")}`;
 };
 
+function formatRupiah(number) {
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" })
+    .format(number)
+    .replace("IDR", "Rp")
+    .replace(",00", ",00");
+}
+
 // ===== Controllers =====
+const getAllEvents = async (req, res) => {
+  try {
+    const events = await Event.findAll();
+
+    return res.status(200).json({
+      status: 200,
+      data: events,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Error fetching data",
+      error: error.message,
+    });
+  }
+};
+const getEvents = async (req, res) => {
+  try {
+    const organizerId = req.user.user_id;
+
+    const events = await Event.findAll({
+      where: { organizer_id: organizerId },
+    });
+
+    return res.status(200).json({
+      status: 200,
+      data: events,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Error fetching data",
+      error: error.message,
+    });
+  }
+};
+
 const getDestination = async (req, res) => {
   const apiKey = process.env.GEOAPIFY_API_KEY;
   const limit = 20;
@@ -69,7 +113,7 @@ const getDestination = async (req, res) => {
     }));
 
     // Store places in memory
-    destinations.length = 0; 
+    destinations.length = 0;
     destinations.push(...places);
 
     res.status(200).json({
@@ -83,6 +127,32 @@ const getDestination = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+const fetchDestinations = async () => {
+  const apiKey = process.env.GEOAPIFY_API_KEY;
+  const limit = 20;
+  const placeId = process.env.PLACE;
+
+  const url2 = `https://api.geoapify.com/v2/places?categories=tourism,building.tourism&filter=place:${placeId}&limit=${limit}&apiKey=${apiKey}`;
+
+  const response = await axios.get(url2);
+  const data = response.data;
+
+  const places = data.features.map((feature, index) => ({
+    place_id: `PL${String(index + 1).padStart(3, "0")}`, // PL001, PL002, etc.
+    village: feature.properties.village,
+    district: feature.properties.district,
+    street: feature.properties.street,
+    formatted: feature.properties.formatted,
+    address_line1: feature.properties.address_line1,
+    address_line2: feature.properties.address_line2,
+    raw: feature.properties.datasource.raw,
+  }));
+
+  // Store places in memory
+  destinations.length = 0;
+  destinations.push(...places);
 };
 
 const createEvent = async (req, res) => {
@@ -99,57 +169,40 @@ const createEvent = async (req, res) => {
         .status(400)
         .json({ status: 400, message: error.details[0].message });
 
+    if (destinations.length === 0) {
+      await fetchDestinations();
+    }
+
+    const destination = destinations.find(
+      (dest) => dest.place_id === req.body.place_id
+    );
+
+    if (!destination) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Destination not found" });
+    }
+
     const photo = req.file ? req.file.filename : null;
-
-    const apiKey = process.env.GEOAPIFY_API_KEY;
-    // const apiKey = dde4de0051c34511a2d00ff8f1b0abba;
-    const radius = 10000;
-    const limit = 20;
-    const latitude = 112.7415854;
-    const longitude = -7.2477332;
-
-    const url = `https://api.geoapify.com/v2/places?categories=tourism,building.tourism&filter=circle:${latitude},${longitude},${radius}&bias=proximity:${latitude},${longitude}&lang=en&limit=${limit}&apiKey=${apiKey}`;
-
-
-    const response = await axios.get(url);
-    const feature = response.data.features[0];
-
-    const location = {
-      name: feature.properties.name,
-      country: feature.properties.country,
-      country_code: feature.properties.country_code,
-      region: feature.properties.region,
-      state: feature.properties.state,
-      city: feature.properties.city,
-      village: feature.properties.village,
-      postcode: feature.properties.postcode,
-      district: feature.properties.district,
-      neighbourhood: feature.properties.neighbourhood,
-      street: feature.properties.street,
-      formatted: feature.properties.formatted,
-      address_line1: feature.properties.address_line1,
-      address_line2: feature.properties.address_line2,
-      geometry: feature.geometry
-    };
 
     const eventId = await generateEventId();
 
     const event = await Event.create({
       event_id: eventId,
       organizer_id: req.user.user_id,
-      event_name: req.body.event_name,
+      event_name: destination.raw.name, // Use name from the destination
       category: req.body.category,
-      location: location.formatted,
+      location: destination.formatted, // Use formatted location from destination
       event_time: req.body.event_time,
       description: req.body.description,
       photo: photo,
+      price: formatRupiah(req.body.price),
     });
 
     return res.status(201).json({
       status: 201,
-      message: "Acara berhasil dibuat",
+      message: "Event created successfully",
       data: {
-        // event,
         event_id: event.event_id,
         organizer_id: event.organizer_id,
         event_name: event.event_name,
@@ -158,6 +211,7 @@ const createEvent = async (req, res) => {
         event_time: moment(event.event_time).format("YYYY-MM-DD HH:mm:ss"),
         description: event.description,
         photo: event.photo,
+        price: event.price,
         createdAt: moment(event.createdAt).format("YYYY-MM-DD HH:mm:ss"),
         updatedAt: moment(event.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
       },
@@ -186,8 +240,6 @@ const inviteTraveler = async (req, res) => {
     return res.status(500).json({ status: 500, message: error.message });
   }
 };
-
-
 
 const manageParticipants = async (req, res) => {
   try {
@@ -246,12 +298,12 @@ const managePayments = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   getDestination,
   inviteTraveler,
   createEvent,
   manageParticipants,
   managePayments,
+  getAllEvents,
+  getEvents,
 };

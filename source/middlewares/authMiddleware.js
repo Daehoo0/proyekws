@@ -2,14 +2,16 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
 const verifyToken = async (req, res, next) => {
-  const token = req.header('x-auth-token').replace('Bearer ', '');
+  const token = req.header('x-auth-token');
 
   if (!token) {
-    return res.status(401).json({ status: 401, message: 'Access Denied' });
+    return res.status(401).json({ status: 401, message: 'Access Denied. No token provided.' });
   }
 
+  const actualToken = token.replace('Bearer ', '');
+
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    const verified = jwt.verify(actualToken, process.env.JWT_SECRET);
     const user = await User.findByPk(verified.id);
 
     if (!user) {
