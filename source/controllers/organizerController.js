@@ -12,8 +12,9 @@ const eventSchema = Joi.object({
   place_id: Joi.string().required(),
   category: Joi.string().optional(),
   event_time: Joi.date().required(),
+  event_name: Joi.string().required(),
   description: Joi.string().optional(),
-  price: Joi.number().required(),
+  price: Joi.number().integer().required()
 });
 
 const participantSchema = Joi.object({
@@ -38,10 +39,10 @@ const generateEventId = async () => {
 };
 
 function formatRupiah(number) {
-  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" })
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' })
     .format(number)
-    .replace("IDR", "Rp")
-    .replace(",00", ",00");
+    .replace('IDR', 'Rp')
+    .replace(',00', ',00');
 }
 
 // ===== Controllers =====
@@ -49,9 +50,17 @@ const getAllEvents = async (req, res) => {
   try {
     const events = await Event.findAll();
 
+    // Format the dates before sending the response
+    const formattedEvents = events.map(event => ({
+      ...event.toJSON(),
+      event_time: moment(event.event_time).format('YYYY-MM-DD HH:mm:ss'),
+      createdAt: moment(event.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+      updatedAt: moment(event.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+    }));
+
     return res.status(200).json({
       status: 200,
-      data: events,
+      data: formattedEvents,
     });
   } catch (error) {
     return res.status(500).json({
@@ -61,6 +70,7 @@ const getAllEvents = async (req, res) => {
     });
   }
 };
+
 const getEvents = async (req, res) => {
   try {
     const organizerId = req.user.user_id;
@@ -69,9 +79,17 @@ const getEvents = async (req, res) => {
       where: { organizer_id: organizerId },
     });
 
+    // Format the dates before sending the response
+    const formattedEvents = events.map(event => ({
+      ...event.toJSON(),
+      event_time: moment(event.event_time).format('YYYY-MM-DD HH:mm:ss'),
+      createdAt: moment(event.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+      updatedAt: moment(event.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+    }));
+
     return res.status(200).json({
       status: 200,
-      data: events,
+      data: formattedEvents,
     });
   } catch (error) {
     return res.status(500).json({
@@ -81,6 +99,7 @@ const getEvents = async (req, res) => {
     });
   }
 };
+
 
 const getDestination = async (req, res) => {
   const apiKey = process.env.GEOAPIFY_API_KEY;
@@ -157,63 +176,59 @@ const fetchDestinations = async () => {
 
 const createEvent = async (req, res) => {
   try {
-    if (req.user.role !== "organizer") {
-      return res
-        .status(403)
-        .json({ status: 403, message: "Unauthorized access" });
+    if (req.user.role !== 'organizer') {
+      return res.status(403).json({ status: 403, message: 'Unauthorized access' });
     }
 
     const { error } = eventSchema.validate(req.body);
-    if (error)
-      return res
-        .status(400)
-        .json({ status: 400, message: error.details[0].message });
+    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
 
     if (destinations.length === 0) {
       await fetchDestinations();
     }
 
-    const destination = destinations.find(
-      (dest) => dest.place_id === req.body.place_id
-    );
+    const destination = destinations.find(dest => dest.place_id === req.body.place_id);
 
     if (!destination) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "Destination not found" });
+      return res.status(404).json({ status: 404, message: 'Destination not found' });
     }
 
     const photo = req.file ? req.file.filename : null;
-
+    
     const eventId = await generateEventId();
+    const balance = parseInt(req.body.price, 10);
+
+    if (isNaN(balance)) {
+      return res.status(400).json({ status: 400, message: 'Invalid price value' });
+    }
 
     const event = await Event.create({
       event_id: eventId,
       organizer_id: req.user.user_id,
-      event_name: destination.raw.name, // Use name from the destination
+      event_name: req.body.event_name,
       category: req.body.category,
       location: destination.formatted, // Use formatted location from destination
       event_time: req.body.event_time,
       description: req.body.description,
       photo: photo,
-      price: formatRupiah(req.body.price),
+      balance: balance
     });
 
     return res.status(201).json({
       status: 201,
-      message: "Event created successfully",
+      message: 'Event created successfully',
       data: {
         event_id: event.event_id,
         organizer_id: event.organizer_id,
         event_name: event.event_name,
         category: event.category,
         location: event.location,
-        event_time: moment(event.event_time).format("YYYY-MM-DD HH:mm:ss"),
+        event_time: moment(event.event_time).format('YYYY-MM-DD HH:mm:ss'),
         description: event.description,
         photo: event.photo,
-        price: event.price,
-        createdAt: moment(event.createdAt).format("YYYY-MM-DD HH:mm:ss"),
-        updatedAt: moment(event.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
+        price: formatRupiah(event.balance),
+        createdAt: moment(event.createdAt).format('YYYY-MM-DD HH:mm:ss'),
+        updatedAt: moment(event.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
       },
     });
   } catch (error) {
