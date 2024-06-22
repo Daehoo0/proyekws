@@ -12,19 +12,6 @@ const Joi = require("joi");
 const { v4: uuidv4 } = require('uuid');
 
 
-const createProfileSchema = Joi.object({
-  user_id: Joi.string().required(),
-  destination: Joi.string().required(),
-  travel_time: Joi.date().required(),
-  interests: Joi.string().required(),
-});
-
-const requestSchema = Joi.object({
-  guide_id: Joi.string().required(),
-  date: Joi.date().required(),
-  message: Joi.string().required(),
-});
-
 const reviewSchema = Joi.object({
   user_id: Joi.string().required(),
   rating: Joi.number().min(1).max(5).required(),
@@ -49,92 +36,7 @@ const processPaymentSchema = Joi.object({
   event_ids: Joi.array().items(Joi.string().required()).required(),
 });
 
-const createProfile = async (req, res) => {
-  try {
-    const { error } = createProfileSchema.validate(req.body);
-    if (error)
-      return res
-        .status(400)
-        .json({ status: 400, message: error.details[0].message });
 
-    const profile = await TravelerProfile.create(req.body);
-
-    return res.status(201).json({
-      status: 201,
-      message: "Profil perjalanan berhasil dibuat",
-      data: {
-        profile: {
-          profile_id: profile.profile_id,
-          user_id: profile.user_id,
-          destination: profile.destination,
-          travel_time: profile.travel_time,
-          interests: profile.interests,
-          createdAt: profile.createdAt,
-          updatedAt: profile.updatedAt,
-        },
-      },
-    });
-  } catch (error) {
-    return res.status(500).json({ status: 500, message: error.message });
-  }
-};
-
-const searchTravelers = async (req, res) => {
-  const { destination, travel_time, interests } = req.query;
-
-  try {
-    const travelers = await TravelerProfile.findAll({
-      where: {
-        destination,
-        travel_time,
-        interests,
-      },
-      include: [User],
-    });
-
-    return res.status(200).json({ status: 200, data: travelers });
-  } catch (error) {
-    return res.status(500).json({ status: 500, message: error.message });
-  }
-};
-
-const sendRequestToGuide = async (req, res) => {
-  try {
-    const { error } = requestSchema.validate(req.body);
-    if (error)
-      return res
-        .status(400)
-        .json({ status: 400, message: error.details[0].message });
-
-    const guideRequest = await GuideRequest.create(req.body);
-
-    return res.status(201).json({
-      status: 201,
-      message: "Permintaan berhasil dikirim",
-      data: guideRequest,
-    });
-  } catch (error) {
-    return res.status(500).json({ status: 500, message: error.message });
-  }
-};
-
-const searchEvents = async (req, res) => {
-  const { destination, category, time } = req.query;
-
-  try {
-    const events = await Event.findAll({
-      where: {
-        destination,
-        category,
-        event_time: time,
-      },
-    });
-
-    return res.status(200).json({ status: 200, data: events });
-  } catch (error) {
-    return res.status(500).json({ status: 500, message: error.message });
-  }
-};
 
 const giveReview = async (req, res) => {
   try {
@@ -176,42 +78,6 @@ const makePayment = async (req, res) => {
   }
 };
 
-const joinEvent = async (req, res) => {
-  try {
-    const { event_id } = req.body;
-
-    // Verifikasi bahwa event ada
-    const event = await Event.findByPk(event_id);
-    if (!event) {
-      return res.status(404).json({ status: 404, message: "Event not found" });
-    }
-
-    // Verifikasi bahwa user tidak mencoba untuk bergabung ke event mereka sendiri
-    if (event.organizer_id === req.user.user_id) {
-      return res.status(400).json({ status: 400, message: "You cannot join your own event" });
-    }
-
-    // Tambahkan pengguna sebagai peserta event
-    const participant = await EventParticipant.create({
-      event_id: event_id,
-      user_id: req.user.user_id,
-      status: 'joined',
-    });
-
-    return res.status(201).json({
-      status: 201,
-      message: "Successfully joined the event",
-      data: {
-        event_id: participant.event_id,
-        user_id: participant.user_id,
-        status: participant.status,
-      },
-    });
-  } catch (error) {
-    return res.status(500).json({ status: 500, message: error.message });
-  }
-};
-
 const viewCart = async (req, res) => {
   try {
     const cartItems = await Cart.findAll({
@@ -227,39 +93,76 @@ const viewCart = async (req, res) => {
 
 const processPayment = async (req, res) => {
   try {
-    const { error } = processPaymentSchema.validate(req.body);
-    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
-
-    const user = await User.findByPk(req.user.user_id);
-    const events = await Event.findAll({
-      where: { event_id: req.body.event_ids },
+    // Mendapatkan semua item dari Cart yang dimiliki oleh user yang login
+    const carts = await Cart.findAll({
+      where: { user_id: req.user.user_id, status: 'pending' }, // ambil yang status pending saja jika ada
+      include: [{ model: Event }], // sertakan model Event untuk mengambil detail event
     });
 
-    const totalAmount = events.reduce((sum, event) => sum + event.balance, 0);
+    if (!carts || carts.length === 0) {
+      return res.status(400).json({ status: 400, message: "No pending events found in cart" });
+    }
+
+    // Menghitung total jumlah yang harus dibayar
+    const totalAmount = carts.reduce((sum, cartItem) => sum + cartItem.Event.balance, 0);
+
+    // Memeriksa saldo user
+    const user = await User.findByPk(req.user.user_id);
+    if (!user) {
+      return res.status(400).json({ status: 400, message: "User not found" });
+    }
 
     if (user.balance < totalAmount) {
       return res.status(400).json({ status: 400, message: "Insufficient balance" });
     }
 
-    await Promise.all(events.map(async (event) => {
-      await EventParticipant.create({
-        event_id: event.event_id,
-        user_id: req.user.user_id,
-        status: 'joined',
+    // Inisialisasi transaksi Sequelize
+    const sequelize = require('../config/sequelize'); // Sesuaikan path sesuai dengan konfigurasi Anda
+    const transaction = await sequelize.transaction();
+
+    try {
+      // Update carts to 'completed'
+      await Cart.update({ status: 'completed' }, { 
+        where: { 
+          user_id: req.user.user_id, 
+          status: 'pending' 
+        },
+        transaction, // pass transaction object for atomicity
       });
 
-      await Cart.update({ status: 'completed' }, { where: { user_id: req.user.user_id, event_id: event.event_id } });
-    }));
+      // Deduct balance from user
+      user.balance -= totalAmount;
+      await user.save({ transaction });
 
-    user.balance -= totalAmount;
-    await user.save();
+      // Menambahkan saldo ke organizer untuk setiap event
+      await Promise.all(carts.map(async (cartItem) => {
+        const event = cartItem.Event;
 
-    await Payment.create({
-      amount: totalAmount,
-      user_id: req.user.user_id,
-    });
+        // Misalkan event memiliki field organizer_id untuk menentukan organizer yang terkait
+        const organizer = await User.findOne({
+          where: {
+            user_id: event.organizer_id,
+            role: 'organizer'
+          }
+        });
 
-    return res.status(200).json({ status: 200, message: "Payment successful" });
+        if (organizer) {
+          organizer.balance += event.balance;
+          await organizer.save({ transaction });
+        }
+      }));
+
+      // Commit transaction if all queries succeed
+      await transaction.commit();
+
+      // Record payment (if needed)
+
+      return res.status(200).json({ status: 200, message: "Payment successful" });
+    } catch (error) {
+      // Rollback transaction if any error occurs
+      await transaction.rollback();
+      throw error; // re-throw the error to be caught by the outer catch block
+    }
   } catch (error) {
     return res.status(500).json({ status: 500, message: error.message });
   }
@@ -286,8 +189,6 @@ const addToCart = async (req, res) => {
     return res.status(500).json({ status: 500, message: error.message });
   }
 };
-
-
 
 const deleteCart = async (req, res) => {
   try {
@@ -316,13 +217,8 @@ const deleteCart = async (req, res) => {
 
 
 module.exports = {
-  createProfile,
-  searchTravelers,
-  sendRequestToGuide,
-  searchEvents,
   giveReview,
   makePayment,
-  joinEvent,
   viewCart,
   processPayment,
   addToCart,
