@@ -1,0 +1,664 @@
+{
+	"info": {
+		"_postman_id": "81152626-bd78-4473-9a29-d838a8a86974",
+		"name": "New Collection",
+		"description": "dokumentasi proyek ws",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36482198"
+	},
+	"item": [
+		{
+			"name": "http://localhost:3000/api/register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "kaoi",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "kakoi@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "asd123",
+							"type": "text"
+						},
+						{
+							"key": "role",
+							"value": "organizer",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"coki@gmail.com\",\n    \"password\": \"asd123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"login"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/organizers/destination",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMSIsInJvbGUiOiJ0cmF2ZWxlciIsImlhdCI6MTcxOTA2Nzg3NCwiZXhwIjoxNzE5MDcxNDc0fQ.370P1NjR_g-5gT7SmZ3ImGC9HY1NcIuLPM-oamMC25M",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "",
+							"value": "",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/organizers/destination",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"organizers",
+						"destination"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/organizers/event",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "photo",
+							"type": "file",
+							"src": "/Users/Daehoo/Downloads/221116973.JPG"
+						},
+						{
+							"key": "place_id",
+							"value": "PL001",
+							"type": "text"
+						},
+						{
+							"key": "event_time",
+							"value": "2025-07-07 18:00:00",
+							"type": "text"
+						},
+						{
+							"key": "event_name",
+							"value": "jalan jalan",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "kumpul bareng",
+							"type": "text"
+						},
+						{
+							"key": "balance",
+							"value": "50000",
+							"type": "text"
+						},
+						{
+							"key": "category",
+							"value": "budaya",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/organizers/event",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"organizers",
+						"event"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/organizers/allevent",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/organizers/allevent",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"organizers",
+						"allevent"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/organizers/event",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/organizers/event",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"organizers",
+						"event"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/organizers/event",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "event_id",
+							"value": "E001",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/organizers/event",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"organizers",
+						"event"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/guides/searcing",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/guides/searcing",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"guides",
+						"searcing"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/guides/searcing/id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "eventId",
+							"value": "E001",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/guides/searcing/id",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"guides",
+						"searcing",
+						"id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/guides/traveller",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/guides/traveller",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"guides",
+						"traveller"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/guides/organizer",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/guides/organizer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"guides",
+						"organizer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/topup",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "amount",
+							"value": "1000000",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/topup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"topup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/update",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMyIsInJvbGUiOiJvcmdhbml6ZXIiLCJpYXQiOjE3MTkwNjg0ODcsImV4cCI6MTcxOTA3MjA4N30.j7boX91zaQkjk8yJP_7LPX40WOgUOHNkt9SykyMNCtA",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "yonko",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "yonko@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "asd123",
+							"type": "text"
+						},
+						{
+							"key": "role",
+							"value": "organizer",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/travelers/cart",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMSIsInJvbGUiOiJ0cmF2ZWxlciIsImlhdCI6MTcxOTA3NjUyNiwiZXhwIjoxNzE5MDgwMTI2fQ.VrVY6A4EIElfrz4Dd3dO-VCeQOllWka91zWOINTuXbk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/travelers/cart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"travelers",
+						"cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/travelers/cart",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMSIsInJvbGUiOiJ0cmF2ZWxlciIsImlhdCI6MTcxOTA3NjUyNiwiZXhwIjoxNzE5MDgwMTI2fQ.VrVY6A4EIElfrz4Dd3dO-VCeQOllWka91zWOINTuXbk",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "event_id",
+							"value": "E001",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/travelers/cart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"travelers",
+						"cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/travelers/cart",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMSIsInJvbGUiOiJ0cmF2ZWxlciIsImlhdCI6MTcxOTA3NjUyNiwiZXhwIjoxNzE5MDgwMTI2fQ.VrVY6A4EIElfrz4Dd3dO-VCeQOllWka91zWOINTuXbk",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "event_id",
+							"value": "E001",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/travelers/cart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"travelers",
+						"cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/travelers/cart/checkout",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlVJRDAwMSIsInJvbGUiOiJ0cmF2ZWxlciIsImlhdCI6MTcxOTA3NjUyNiwiZXhwIjoxNzE5MDgwMTI2fQ.VrVY6A4EIElfrz4Dd3dO-VCeQOllWka91zWOINTuXbk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/travelers/cart/checkout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"travelers",
+						"cart",
+						"checkout"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
