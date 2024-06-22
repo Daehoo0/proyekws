@@ -6,8 +6,11 @@ const {
   Payment,
   EventParticipant,
   User,
+  Cart,
 } = require("../models");
 const Joi = require("joi");
+const { v4: uuidv4 } = require('uuid');
+
 
 const createProfileSchema = Joi.object({
   user_id: Joi.string().required(),
@@ -32,6 +35,14 @@ const paymentSchema = Joi.object({
   amount: Joi.number().required(),
   guide_id: Joi.string().optional(),
   event_id: Joi.string().optional(),
+});
+
+const addToCartSchema = Joi.object({
+  event_id: Joi.string().required(),
+});
+
+const processPaymentSchema = Joi.object({
+  event_ids: Joi.array().items(Joi.string().required()).required(),
 });
 
 const createProfile = async (req, res) => {
@@ -197,6 +208,80 @@ const joinEvent = async (req, res) => {
   }
 };
 
+const viewCart = async (req, res) => {
+  try {
+    const cartItems = await Cart.findAll({
+      where: { user_id: req.user.user_id, status: 'pending' },
+      include: [Event],
+    });
+
+    return res.status(200).json({ status: 200, data: cartItems });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+
+const processPayment = async (req, res) => {
+  try {
+    const { error } = processPaymentSchema.validate(req.body);
+    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+
+    const user = await User.findByPk(req.user.user_id);
+    const events = await Event.findAll({
+      where: { event_id: req.body.event_ids },
+    });
+
+    const totalAmount = events.reduce((sum, event) => sum + event.balance, 0);
+
+    if (user.balance < totalAmount) {
+      return res.status(400).json({ status: 400, message: "Insufficient balance" });
+    }
+
+    await Promise.all(events.map(async (event) => {
+      await EventParticipant.create({
+        event_id: event.event_id,
+        user_id: req.user.user_id,
+        status: 'joined',
+      });
+
+      await Cart.update({ status: 'completed' }, { where: { user_id: req.user.user_id, event_id: event.event_id } });
+    }));
+
+    user.balance -= totalAmount;
+    await user.save();
+
+    await Payment.create({
+      amount: totalAmount,
+      user_id: req.user.user_id,
+    });
+
+    return res.status(200).json({ status: 200, message: "Payment successful" });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+
+const addToCart = async (req, res) => {
+  try {
+    const { error } = addToCartSchema.validate(req.body);
+    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+
+    const event = await Event.findByPk(req.body.event_id);
+    if (!event) {
+      return res.status(404).json({ status: 404, message: "Event not found" });
+    }
+
+    await Cart.create({
+      cart_id: uuidv4(),
+      user_id: req.user.user_id,
+      event_id: req.body.event_id,
+    });
+
+    return res.status(201).json({ status: 201, message: "Event added to cart" });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
 
 
 module.exports = {
@@ -207,4 +292,7 @@ module.exports = {
   giveReview,
   makePayment,
   joinEvent,
+  viewCart,
+  processPayment,
+  addToCart
 };

@@ -51,7 +51,6 @@ CREATE TABLE events (
     FOREIGN KEY (organizer_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-
 CREATE TABLE event_participants (
     participant_id VARCHAR(255) NOT NULL PRIMARY KEY,
     event_id VARCHAR(255) NOT NULL,
@@ -96,6 +95,18 @@ CREATE TABLE payments (
     FOREIGN KEY (guide_id) REFERENCES guides(guide_id) ON DELETE CASCADE,
     FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE
 );
+
+CREATE TABLE carts (
+    cart_id VARCHAR(255) NOT NULL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    event_id VARCHAR(255) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending',
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE
+);
+
 
 INSERT INTO users (user_id, username, password, email, role, balance, createdAt, updatedAt) VALUES 
 ('UID001', 'traveler1', '$2b$10$hashpassword', 'traveler1@example.com', 'traveler', 100, NOW(), NOW()),

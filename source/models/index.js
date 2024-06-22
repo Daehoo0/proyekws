@@ -1,14 +1,15 @@
 const Sequelize = require('sequelize');
 const db = require('../config/sequelize');
 
-const User = require('./User'); // Ensure this matches the actual filename
-const TravelerProfile = require('./TravelerProfile'); // Ensure this matches the actual filename
-const Guide = require('./Guide'); // Ensure this matches the actual filename
-const Event = require('./Event'); // Ensure this matches the actual filename
-const EventParticipant = require('./EventParticipant'); // Ensure this matches the actual filename
-const GuideRequest = require('./GuideRequest'); // Ensure this matches the actual filename
-const Review = require('./Review'); // Ensure this matches the actual filename
-const Payment = require('./Payment'); // Ensure this matches the actual filename
+const User = require('./User'); 
+const TravelerProfile = require('./TravelerProfile');
+const Guide = require('./Guide');
+const Event = require('./Event');
+const EventParticipant = require('./EventParticipant');
+const GuideRequest = require('./GuideRequest');
+const Review = require('./Review');
+const Payment = require('./Payment');
+const Cart = require('./Cart');
 
 // Define relationships
 User.hasOne(TravelerProfile, { foreignKey: 'user_id' });
@@ -44,6 +45,12 @@ Payment.belongsTo(Guide, { foreignKey: 'guide_id' });
 Event.hasMany(Payment, { foreignKey: 'event_id' });
 Payment.belongsTo(Event, { foreignKey: 'event_id' });
 
+User.hasMany(Cart, { foreignKey: 'user_id' });
+Cart.belongsTo(User, { foreignKey: 'user_id' });
+
+Event.hasMany(Cart, { foreignKey: 'event_id' });
+Cart.belongsTo(Event, { foreignKey: 'event_id' });
+
 module.exports = {
   db,
   User,
@@ -54,4 +61,5 @@ module.exports = {
   GuideRequest,
   Review,
   Payment,
+  Cart,
 };
