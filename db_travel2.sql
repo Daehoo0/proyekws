@@ -44,12 +44,13 @@ CREATE TABLE events (
     location VARCHAR(255) NOT NULL,
     event_time DATETIME NOT NULL,
     description TEXT,
-    balance INT DEFAULT 0, 
+    balance INT NOT NULL DEFAULT 0, 
     photo VARCHAR(255),
-    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (organizer_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
 
 CREATE TABLE event_participants (
     participant_id VARCHAR(255) NOT NULL PRIMARY KEY,
@@ -111,7 +112,7 @@ INSERT INTO events (event_id, organizer_id, event_name, category, location, even
 ('E001', 'UID003', 'Beach Party', 'Party', 'Bali', '2024-07-05 18:00:00', 'Join us for a fun beach party!', 'beach_party.jpg', NOW(), NOW());
 
 INSERT INTO event_participants (participant_id, event_id, user_id, createdAt, updatedAt) VALUES 
-('EP001', 'E001', 'UID001', NOW(), NOW());
+('EP001', 'E001', 'UID002', NOW(), NOW());
 
 INSERT INTO guide_requests (request_id, traveler_id, guide_id, request_date, message, status, createdAt, updatedAt) VALUES 
 ('GR001', 'UID001', 'G001', '2024-07-02 00:00:00', 'Looking for a guide in Bali', 'pending', NOW(), NOW());

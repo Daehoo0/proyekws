@@ -4,6 +4,7 @@ const {
   Event,
   Review,
   Payment,
+  EventParticipant,
   User,
 } = require("../models");
 const Joi = require("joi");
@@ -160,6 +161,44 @@ const makePayment = async (req, res) => {
   }
 };
 
+const joinEvent = async (req, res) => {
+  try {
+    const { event_id } = req.body;
+
+    // Verifikasi bahwa event ada
+    const event = await Event.findByPk(event_id);
+    if (!event) {
+      return res.status(404).json({ status: 404, message: "Event not found" });
+    }
+
+    // Verifikasi bahwa user tidak mencoba untuk bergabung ke event mereka sendiri
+    if (event.organizer_id === req.user.user_id) {
+      return res.status(400).json({ status: 400, message: "You cannot join your own event" });
+    }
+
+    // Tambahkan pengguna sebagai peserta event
+    const participant = await EventParticipant.create({
+      event_id: event_id,
+      user_id: req.user.user_id,
+      status: 'joined',
+    });
+
+    return res.status(201).json({
+      status: 201,
+      message: "Successfully joined the event",
+      data: {
+        event_id: participant.event_id,
+        user_id: participant.user_id,
+        status: participant.status,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+
+
+
 module.exports = {
   createProfile,
   searchTravelers,
@@ -167,4 +206,5 @@ module.exports = {
   searchEvents,
   giveReview,
   makePayment,
+  joinEvent,
 };

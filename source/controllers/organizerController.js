@@ -14,7 +14,8 @@ const eventSchema = Joi.object({
   event_time: Joi.date().required(),
   event_name: Joi.string().required(),
   description: Joi.string().optional(),
-  price: Joi.number().integer().required()
+  // balance: Joi.number().integer().required(),
+  balance: Joi.number().integer().required(),
 });
 
 const participantSchema = Joi.object({
@@ -39,10 +40,13 @@ const generateEventId = async () => {
 };
 
 function formatRupiah(number) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' })
+  if (isNaN(number)) {
+    return "Rp0";
+  }
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" })
     .format(number)
-    .replace('IDR', 'Rp')
-    .replace(',00', ',00');
+    .replace("IDR", "Rp")
+    .replace(",00", ",00");
 }
 
 // ===== Controllers =====
@@ -51,11 +55,11 @@ const getAllEvents = async (req, res) => {
     const events = await Event.findAll();
 
     // Format the dates before sending the response
-    const formattedEvents = events.map(event => ({
+    const formattedEvents = events.map((event) => ({
       ...event.toJSON(),
-      event_time: moment(event.event_time).format('YYYY-MM-DD HH:mm:ss'),
-      createdAt: moment(event.createdAt).format('YYYY-MM-DD HH:mm:ss'),
-      updatedAt: moment(event.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+      event_time: moment(event.event_time).format("YYYY-MM-DD HH:mm:ss"),
+      createdAt: moment(event.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+      updatedAt: moment(event.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
     }));
 
     return res.status(200).json({
@@ -70,6 +74,46 @@ const getAllEvents = async (req, res) => {
     });
   }
 };
+
+// const getAllEvents = async (req, res) => {
+//   try {
+//     const events = await Event.findAll({
+//       include: [
+//         {
+//           model: EventParticipant,
+//           attributes: ['user_id'],
+//         },
+//       ],
+//     });
+
+//     // Format the response to include participant IDs
+//     const formattedEvents = events.map(event => ({
+//       event_id: event.event_id,
+//       organizer_id: event.organizer_id,
+//       event_name: event.event_name,
+//       category: event.category,
+//       location: event.location,
+//       event_time: moment(event.event_time).format("YYYY-MM-DD HH:mm:ss"),
+//       description: event.description,
+//       photo: event.photo,
+//       balance: event.balance,
+//       createdAt: moment(event.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+//       updatedAt: moment(event.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
+//       participants: event.EventParticipants.map(participant => participant.user_id),
+//     }));
+
+//     return res.status(200).json({
+//       status: 200,
+//       data: formattedEvents,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       status: 500,
+//       message: "Error fetching data",
+//       error: error.message,
+//     });
+//   }
+// };
 
 const getEvents = async (req, res) => {
   try {
@@ -80,11 +124,11 @@ const getEvents = async (req, res) => {
     });
 
     // Format the dates before sending the response
-    const formattedEvents = events.map(event => ({
+    const formattedEvents = events.map((event) => ({
       ...event.toJSON(),
-      event_time: moment(event.event_time).format('YYYY-MM-DD HH:mm:ss'),
-      createdAt: moment(event.createdAt).format('YYYY-MM-DD HH:mm:ss'),
-      updatedAt: moment(event.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+      event_time: moment(event.event_time).format("YYYY-MM-DD HH:mm:ss"),
+      createdAt: moment(event.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+      updatedAt: moment(event.updatedAt).format("YYYY-MM-DD HH:mm:ss"),
     }));
 
     return res.status(200).json({
@@ -99,7 +143,6 @@ const getEvents = async (req, res) => {
     });
   }
 };
-
 
 const getDestination = async (req, res) => {
   const apiKey = process.env.GEOAPIFY_API_KEY;
@@ -194,12 +237,12 @@ const createEvent = async (req, res) => {
     }
 
     const photo = req.file ? req.file.filename : null;
-    
+
     const eventId = await generateEventId();
-    const balance = parseInt(req.body.price, 10);
+    const balance = parseInt(req.body.balance, 10);
 
     if (isNaN(balance)) {
-      return res.status(400).json({ status: 400, message: 'Invalid price value' });
+      return res.status(400).json({ status: 400, message: 'Invalid balance value' });
     }
 
     const event = await Event.create({
@@ -207,11 +250,11 @@ const createEvent = async (req, res) => {
       organizer_id: req.user.user_id,
       event_name: req.body.event_name,
       category: req.body.category,
-      location: destination.formatted, // Use formatted location from destination
+      location: destination.formatted,
       event_time: req.body.event_time,
       description: req.body.description,
       photo: photo,
-      balance: balance
+      balance: balance,
     });
 
     return res.status(201).json({
@@ -226,10 +269,59 @@ const createEvent = async (req, res) => {
         event_time: moment(event.event_time).format('YYYY-MM-DD HH:mm:ss'),
         description: event.description,
         photo: event.photo,
-        price: formatRupiah(event.balance),
+        balance: event.balance,
         createdAt: moment(event.createdAt).format('YYYY-MM-DD HH:mm:ss'),
         updatedAt: moment(event.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
       },
+    });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+
+const deleteEvent = async (req, res) => {
+  try {
+    const { event_id } = req.body;
+
+    // Verifikasi bahwa pengguna yang melakukan request adalah organizer dari event
+    const event = await Event.findOne({ where: { event_id, organizer_id: req.user.user_id } });
+
+    if (!event) {
+      return res.status(404).json({ status: 404, message: "Event not found or unauthorized access" });
+    }
+
+    await Event.destroy({
+      where: { event_id },
+    });
+
+    return res.status(200).json({
+      status: 200,
+      message: "Event successfully deleted",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Error deleting event",
+      error: error.message,
+    });
+  }
+};
+
+const deleteEventArray = async (req, res) => {
+  try {
+    const { event_id } = req.body; // Ambil array event_id dari body
+
+    if (!Array.isArray(event_id)) {
+      return res.status(400).json({ status: 400, message: "Invalid input. Expected an array of event IDs." });
+    }
+
+    await Event.destroy({
+      where: { event_id },
+    });
+
+    return res.status(200).json({
+      status: 200,
+      message: "Events deleted successfully",
     });
   } catch (error) {
     return res.status(500).json({ status: 500, message: error.message });
@@ -321,4 +413,6 @@ module.exports = {
   managePayments,
   getAllEvents,
   getEvents,
+  deleteEvent,
+  deleteEventArray,
 };

@@ -1,13 +1,10 @@
+// models/eventParticipant.js
 const { Sequelize, DataTypes } = require('sequelize');
 const db = require('../config/sequelize');
 const Event = require('./Event');
 const User = require('./User');
 
 const EventParticipant = db.define('EventParticipant', {
-  participant_id: {
-    type: DataTypes.STRING,
-    primaryKey: true,
-  },
   event_id: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -24,14 +21,12 @@ const EventParticipant = db.define('EventParticipant', {
       key: 'user_id',
     },
   },
-  createdAt: {
-    type: DataTypes.DATE,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+  status: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  updatedAt: {
-    type: DataTypes.DATE,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-  },
+}, {
+  timestamps: true,
 });
 
 module.exports = EventParticipant;

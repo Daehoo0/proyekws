@@ -33,6 +33,11 @@ const Event = db.define('Event', {
   description: {
     type: DataTypes.TEXT,
   },
+  balance: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
   photo: {
     type: DataTypes.STRING,
   },
@@ -43,6 +48,7 @@ const Event = db.define('Event', {
   updatedAt: {
     type: DataTypes.DATE,
     defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    onUpdate: Sequelize.literal('CURRENT_TIMESTAMP'),
   },
 });
 

@@ -1,14 +1,14 @@
 const Sequelize = require('sequelize');
 const db = require('../config/sequelize');
 
-const User = require('./user');
-const TravelerProfile = require('./travelerProfile');
-const Guide = require('./guide');
-const Event = require('./event');
-const EventParticipant = require('./eventParticipant');
-const GuideRequest = require('./guideRequest');
-const Review = require('./review');
-const Payment = require('./payment');
+const User = require('./User'); // Ensure this matches the actual filename
+const TravelerProfile = require('./TravelerProfile'); // Ensure this matches the actual filename
+const Guide = require('./Guide'); // Ensure this matches the actual filename
+const Event = require('./Event'); // Ensure this matches the actual filename
+const EventParticipant = require('./EventParticipant'); // Ensure this matches the actual filename
+const GuideRequest = require('./GuideRequest'); // Ensure this matches the actual filename
+const Review = require('./Review'); // Ensure this matches the actual filename
+const Payment = require('./Payment'); // Ensure this matches the actual filename
 
 // Define relationships
 User.hasOne(TravelerProfile, { foreignKey: 'user_id' });
