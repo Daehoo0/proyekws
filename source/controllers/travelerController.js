@@ -41,6 +41,10 @@ const addToCartSchema = Joi.object({
   event_id: Joi.string().required(),
 });
 
+const deleteCartSchema = Joi.object({
+  event_id: Joi.string().required(),
+});
+
 const processPaymentSchema = Joi.object({
   event_ids: Joi.array().items(Joi.string().required()).required(),
 });
@@ -284,6 +288,33 @@ const addToCart = async (req, res) => {
 };
 
 
+
+const deleteCart = async (req, res) => {
+  try {
+    const { error } = deleteCartSchema.validate(req.body);
+    if (error) return res.status(400).json({ status: 400, message: error.details[0].message });
+
+    const cartItem = await Cart.findOne({
+      where: {
+        user_id: req.user.user_id,
+        event_id: req.body.event_id,
+        status: 'pending',
+      },
+    });
+
+    if (!cartItem) {
+      return res.status(404).json({ status: 404, message: "Item not found in cart" });
+    }
+
+    await cartItem.destroy();
+
+    return res.status(200).json({ status: 200, message: "Item removed from cart" });
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: error.message });
+  }
+};
+
+
 module.exports = {
   createProfile,
   searchTravelers,
@@ -294,5 +325,6 @@ module.exports = {
   joinEvent,
   viewCart,
   processPayment,
-  addToCart
+  addToCart,
+  deleteCart
 };
