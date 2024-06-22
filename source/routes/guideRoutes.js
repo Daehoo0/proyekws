@@ -1,13 +1,11 @@
 const express = require('express');
-const { createGuideProfile, updateGuideProfile, deleteGuideProfile, acceptOrRejectRequest, getGuideRequests, managePayments } = require('../controllers/guideController');
+const {  getEventById, getAllEvent, getAllorganizer, getAllTravelers } = require('../controllers/guideController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-router.post('/profile', verifyToken, createGuideProfile);
-router.put('/profile', verifyToken, updateGuideProfile);
-router.delete('/profile', verifyToken, deleteGuideProfile);
-router.post('/request', verifyToken, acceptOrRejectRequest);
-router.get('/requests', verifyToken, getGuideRequests);
-router.get('/payments', verifyToken, managePayments);
+router.get('/searcing/id', verifyToken, getEventById);
+router.get('/searcing', verifyToken, getAllEvent);
+router.get('/traveller', verifyToken, getAllTravelers);
+router.get('/organizer', verifyToken, getAllorganizer);
 
 module.exports = router;
